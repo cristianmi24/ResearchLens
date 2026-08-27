@@ -1,0 +1,864 @@
+/* Landing "Trama" — deliberadamente aislado del resto de la app (fuentes, paleta y
+   layout propios). Todo queda prefijado bajo .trama-landing para no filtrar estos
+   estilos hacia AppShell ni el resto de páginas, que usan el sistema de diseño de
+   Tailwind en src/index.css. */
+
+.trama-landing {
+  /* Tema claro: tinta cálida oscura sobre papel crema, con acentos pastel/vivos. */
+  --ink: #fbf7ef;
+  --ink-deep: #f2e8d6;
+  --paper: #2c2620;
+  --paper-dim: #7d7364;
+  --brass: #d1993f;
+  --crimson: #e0636e;
+  --teal: #2fa89a;
+  --line-faint: rgba(44, 38, 32, 0.12);
+  --line-faint-2: rgba(44, 38, 32, 0.06);
+  --max: 1180px;
+
+  position: relative;
+  /* Foto de fondo (public/fondo.png) como marca de agua: un velo del mismo
+     tono --ink deja la foto al ~60% de visibilidad, sin tapar el color
+     base. background-attachment:fixed evita que se estire con el alto
+     total de la página (es una landing larga). */
+  background-color: var(--ink);
+  background-image: linear-gradient(rgba(251, 247, 239, 0.4), rgba(251, 247, 239, 0.4)), url("/fondo.png");
+  background-size: cover;
+  background-position: center 20%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--paper);
+  font-family: "Space Grotesk", sans-serif;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+.trama-landing *,
+.trama-landing *::before,
+.trama-landing *::after {
+  box-sizing: border-box;
+}
+
+.trama-landing h1,
+.trama-landing h2,
+.trama-landing h3 {
+  font-family: "Fraunces", serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.trama-landing .mono {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.02em;
+}
+
+.trama-landing a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.trama-landing ::selection {
+  background: var(--brass);
+  color: var(--paper);
+}
+
+/* ---------- NAV ---------- */
+.trama-landing nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 5vw;
+  transition: background 0.4s ease, padding 0.4s ease, border-color 0.4s ease;
+  border-bottom: 1px solid transparent;
+}
+.trama-landing nav.scrolled {
+  background: rgba(251, 247, 239, 0.86);
+  backdrop-filter: blur(10px);
+  padding: 14px 5vw;
+  border-bottom: 1px solid var(--line-faint);
+}
+.trama-landing .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Fraunces", serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.trama-landing .brand-mark {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  flex-shrink: 0;
+}
+.trama-landing .brand-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.trama-landing .nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.trama-landing .nav-toggle-icon {
+  display: flex;
+}
+
+.trama-landing .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2.6rem;
+}
+.trama-landing .nav-links a {
+  font-size: 0.92rem;
+  color: var(--paper-dim);
+  position: relative;
+  transition: color 0.25s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.trama-landing .nav-links a:not(.enter-btn)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 1px;
+  background: var(--brass);
+  transition: width 0.3s ease;
+}
+.trama-landing .nav-links a:not(.enter-btn):hover {
+  color: var(--paper);
+}
+.trama-landing .nav-links a:not(.enter-btn):hover::after {
+  width: 100%;
+}
+
+.trama-landing .enter-btn {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+  color: var(--paper);
+  background: var(--brass);
+  padding: 9px 20px;
+  border-radius: 2px;
+  border: 1px solid var(--brass);
+  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+.trama-landing .enter-btn:hover {
+  background: transparent;
+  color: var(--brass);
+  transform: translateY(-1px);
+}
+
+.trama-landing .nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--paper);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.trama-landing .nav-toggle:hover {
+  background: var(--line-faint-2);
+  border-color: var(--line-faint);
+}
+
+/* ---------- HERO ---------- */
+.trama-landing .hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 5vw;
+  overflow: hidden;
+}
+.trama-landing .hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.9;
+}
+.trama-landing .hero-canvas svg {
+  width: 100%;
+  height: 100%;
+}
+.trama-landing .hero-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 20% 45%, rgba(251, 247, 239, 0.4) 0%, rgba(251, 247, 239, 0.88) 68%, var(--ink) 100%);
+  pointer-events: none;
+}
+
+.trama-landing .hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  padding-top: 2rem;
+}
+.trama-landing .eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  color: var(--brass);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.6rem;
+  opacity: 0;
+  animation: trama-fade-up 0.8s ease forwards;
+  animation-delay: 0.15s;
+}
+.trama-landing .eyebrow::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: var(--brass);
+}
+.trama-landing .hero h1 {
+  font-size: clamp(2.4rem, 5.4vw, 4.1rem);
+  line-height: 1.06;
+  color: var(--paper);
+  margin-bottom: 1.6rem;
+  opacity: 0;
+  animation: trama-fade-up 0.9s ease forwards;
+  animation-delay: 0.3s;
+}
+.trama-landing .hero h1 em {
+  font-style: italic;
+  color: var(--brass);
+}
+.trama-landing .hero p.lead {
+  font-size: 1.08rem;
+  color: var(--paper-dim);
+  line-height: 1.65;
+  max-width: 480px;
+  margin-bottom: 2.4rem;
+  opacity: 0;
+  animation: trama-fade-up 0.9s ease forwards;
+  animation-delay: 0.45s;
+}
+.trama-landing .hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+  opacity: 0;
+  animation: trama-fade-up 0.9s ease forwards;
+  animation-delay: 0.6s;
+}
+.trama-landing .btn-primary {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.86rem;
+  background: var(--brass);
+  color: var(--paper);
+  padding: 14px 28px;
+  border-radius: 2px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.trama-landing .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -8px rgba(209, 153, 63, 0.45);
+}
+.trama-landing .btn-ghost {
+  font-size: 0.9rem;
+  color: var(--paper-dim);
+  border-bottom: 1px solid var(--line-faint);
+  padding-bottom: 2px;
+  background: none;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+.trama-landing .btn-ghost:hover {
+  color: var(--paper);
+  border-color: var(--paper);
+}
+
+@keyframes trama-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trama-landing .source-tags {
+  position: absolute;
+  bottom: 6vh;
+  right: 5vw;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  opacity: 0;
+  animation: trama-fade-up 1s ease forwards;
+  animation-delay: 0.9s;
+}
+.trama-landing .source-tags .label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  color: var(--paper-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.trama-landing .tag-grid {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 8px;
+}
+.trama-landing .tag {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.74rem;
+  font-weight: 500;
+  padding: 5px 12px 5px 9px;
+  border: 1px solid var(--line-faint);
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: transform 0.2s ease;
+}
+.trama-landing .tag:hover {
+  transform: translateY(-1px);
+}
+
+/* ---------- SECTION SHARED ---------- */
+.trama-landing section {
+  position: relative;
+  padding: 9rem 5vw;
+}
+.trama-landing .section-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+}
+.trama-landing .section-tag {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  color: var(--brass);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+  display: block;
+}
+.trama-landing .section-title {
+  font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+  max-width: 640px;
+  margin-bottom: 1rem;
+}
+.trama-landing .section-sub {
+  color: var(--paper-dim);
+  max-width: 520px;
+  line-height: 1.6;
+  margin-bottom: 4rem;
+}
+
+.trama-landing .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.trama-landing .reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- QUIENES SOMOS ---------- */
+.trama-landing #quienes-somos {
+  background: var(--ink-deep);
+  border-top: 1px solid var(--line-faint);
+  border-bottom: 1px solid var(--line-faint);
+}
+
+/* La marca de agua (background de .trama-landing) solo debe verse detrás
+   del hero, que tiene su propio velo (.hero-veil) calibrado para mantener
+   el texto legible. El resto de secciones necesita un fondo sólido propio
+   para no perder contraste contra la foto. */
+.trama-landing #como-usarla {
+  background: var(--ink);
+}
+.trama-landing footer {
+  background: var(--ink-deep);
+}
+.trama-landing .card-index {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+.trama-landing .index-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.35));
+  border: 1px solid var(--line-faint);
+  border-radius: 3px;
+  padding: 2.4rem 2.2rem;
+  position: relative;
+}
+.trama-landing .index-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 28px;
+  width: 1px;
+  height: 100%;
+  background: var(--line-faint-2);
+}
+.trama-landing .index-card .tab {
+  position: absolute;
+  top: -1px;
+  left: 2rem;
+  transform: translateY(-100%);
+  background: var(--brass);
+  color: var(--paper);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  padding: 4px 12px;
+  letter-spacing: 0.08em;
+  border-radius: 3px 3px 0 0;
+}
+.trama-landing .index-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.6rem;
+}
+.trama-landing .index-card .role {
+  color: var(--teal);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  margin-bottom: 1.2rem;
+  display: block;
+}
+.trama-landing .index-card p {
+  color: var(--paper-dim);
+  line-height: 1.7;
+  font-size: 0.95rem;
+  margin: 0;
+  min-height: 5.1em;
+}
+.trama-landing .index-card {
+  transition: opacity 0.35s ease;
+}
+
+.trama-landing .carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.4rem;
+}
+.trama-landing .carousel-dots {
+  display: flex;
+  gap: 8px;
+}
+.trama-landing .carousel-dots button {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--line-faint);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+.trama-landing .carousel-dots button.active {
+  background: var(--brass);
+  border-color: var(--brass);
+  transform: scale(1.2);
+}
+.trama-landing .carousel-arrows {
+  display: flex;
+  gap: 8px;
+}
+.trama-landing .carousel-arrows button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line-faint);
+  background: transparent;
+  color: var(--paper-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "IBM Plex Mono", monospace;
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+.trama-landing .carousel-arrows button:hover {
+  border-color: var(--brass);
+  color: var(--brass);
+}
+.trama-landing .index-card .stamp {
+  margin-top: 1.6rem;
+  padding-top: 1.2rem;
+  border-top: 1px dashed var(--line-faint);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.75rem;
+  color: var(--paper-dim);
+  display: flex;
+  justify-content: space-between;
+}
+
+.trama-landing .mission-block p {
+  color: var(--paper-dim);
+  line-height: 1.8;
+  font-size: 1.02rem;
+  margin-bottom: 1.3rem;
+}
+.trama-landing .mission-block strong {
+  color: var(--paper);
+  font-weight: 600;
+}
+
+/* ---------- COMO USARLA ---------- */
+.trama-landing .steps {
+  display: flex;
+  flex-direction: column;
+}
+.trama-landing .step {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  padding: 2.6rem 0;
+  border-top: 1px solid var(--line-faint);
+}
+.trama-landing .step:last-child {
+  border-bottom: 1px solid var(--line-faint);
+}
+.trama-landing .step-num {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.85rem;
+  color: var(--brass);
+  padding-top: 0.3rem;
+}
+.trama-landing .step h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.7rem;
+}
+.trama-landing .step p {
+  color: var(--paper-dim);
+  line-height: 1.7;
+  font-size: 0.95rem;
+  margin: 0;
+}
+.trama-landing .step-visual {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.trama-landing .node-chip {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  border: 1px solid var(--line-faint);
+  border-radius: 20px;
+  padding: 5px 12px;
+  color: var(--paper-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.trama-landing .node-chip .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  flex-shrink: 0;
+}
+.trama-landing .node-chip.arxiv .dot {
+  background: var(--crimson);
+}
+.trama-landing .node-chip.openalex .dot {
+  background: var(--brass);
+}
+.trama-landing .node-chip.youtube .dot {
+  background: #e2636e;
+}
+
+/* ---------- FOOTER ---------- */
+.trama-landing footer {
+  padding: 3.4rem 5vw 2.6rem;
+  border-top: 1px solid var(--line-faint);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.trama-landing footer .brand {
+  font-size: 1rem;
+}
+.trama-landing footer p {
+  color: var(--paper-dim);
+  font-size: 0.82rem;
+  font-family: "IBM Plex Mono", monospace;
+  margin: 0;
+}
+
+/* ---------- MODAL (login/registro real) ---------- */
+.trama-landing .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 26, 20, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 1rem;
+}
+.trama-landing .modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.trama-landing .modal-box {
+  background: var(--ink);
+  border: 1px solid var(--line-faint);
+  box-shadow: 0 24px 48px -12px rgba(44, 38, 32, 0.25);
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2.6rem;
+  border-radius: 4px;
+  text-align: left;
+  position: relative;
+  transform: translateY(14px);
+  transition: transform 0.35s ease;
+}
+.trama-landing .modal-overlay.open .modal-box {
+  transform: translateY(0);
+}
+.trama-landing .modal-box h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.9rem;
+}
+.trama-landing .modal-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  color: var(--paper-dim);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.trama-landing .modal-close:hover {
+  color: var(--paper);
+}
+
+.trama-landing .auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: rgba(44, 38, 32, 0.05);
+  border: 1px solid var(--line-faint);
+  border-radius: 2px;
+  padding: 4px;
+  margin-bottom: 1.6rem;
+}
+.trama-landing .auth-tabs button {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  padding: 8px;
+  border-radius: 2px;
+  border: none;
+  background: none;
+  color: var(--paper-dim);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.trama-landing .auth-tabs button.active {
+  background: var(--brass);
+  color: var(--paper);
+}
+
+.trama-landing .field-row {
+  display: grid;
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+.trama-landing .field-row.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+.trama-landing .field label {
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  color: var(--paper-dim);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+}
+.trama-landing .field input {
+  width: 100%;
+  background: rgba(44, 38, 32, 0.03);
+  border: 1px solid var(--line-faint);
+  border-radius: 2px;
+  padding: 10px 12px;
+  color: var(--paper);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.92rem;
+}
+.trama-landing .field input::placeholder {
+  color: rgba(125, 115, 100, 0.6);
+}
+.trama-landing .field input:focus {
+  outline: none;
+  border-color: var(--brass);
+}
+.trama-landing .field-hint {
+  font-size: 0.72rem;
+  color: var(--paper-dim);
+  margin-top: 0.4rem;
+}
+
+.trama-landing .auth-error {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  color: #a13f45;
+  background: rgba(224, 99, 110, 0.12);
+  border: 1px solid rgba(224, 99, 110, 0.4);
+  border-radius: 2px;
+  padding: 10px 12px;
+  margin-bottom: 1rem;
+}
+
+.trama-landing .auth-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.4rem;
+}
+.trama-landing .auth-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+/* ---------- RESPONSIVE ---------- */
+.trama-landing .nav-scrim {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .trama-landing .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 104;
+    background: rgba(44, 38, 32, 0.35);
+    backdrop-filter: blur(2px);
+    border: none;
+    animation: trama-fade-up 0.2s ease;
+  }
+  .trama-landing .nav-links {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: min(78vw, 320px);
+    background: var(--ink-deep);
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2.4rem;
+    padding: 0 2.2rem;
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+    border-right: 1px solid var(--line-faint);
+    box-shadow: 24px 0 48px -20px rgba(44, 38, 32, 0.2);
+  }
+  .trama-landing .nav-links.open {
+    transform: translateX(0);
+  }
+  .trama-landing .nav-toggle {
+    display: flex;
+    z-index: 110;
+  }
+  .trama-landing .card-index {
+    grid-template-columns: 1fr;
+  }
+  .trama-landing .step {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  .trama-landing .source-tags {
+    display: none;
+  }
+  .trama-landing .field-row.two-col {
+    grid-template-columns: 1fr;
+  }
+  .trama-landing section {
+    padding: 5.5rem 6vw;
+  }
+  .trama-landing .card-index {
+    gap: 2rem;
+  }
+  .trama-landing .index-card {
+    padding: 1.8rem 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .trama-landing .hero {
+    padding: 0 6vw;
+  }
+  .trama-landing .hero-content {
+    padding-top: 4.5rem;
+  }
+  .trama-landing .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .trama-landing .btn-primary {
+    justify-content: center;
+  }
+  .trama-landing .btn-ghost {
+    text-align: center;
+  }
+  .trama-landing .modal-box {
+    padding: 1.8rem 1.4rem;
+  }
+  .trama-landing .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .trama-landing .modal-box {
+    max-width: 100%;
+    border-radius: 12px 12px 0 0;
+    max-height: 92vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trama-landing * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

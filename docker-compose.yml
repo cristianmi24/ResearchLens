@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Misma URL relativa: el navegador llama a /api y nginx lo proxea al backend.
+        VITE_API_BASE_URL: /api
+    image: cristianmi2404/researchlens:latest
+    container_name: researchlens
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8080:80"

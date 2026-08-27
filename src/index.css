@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Surfaces */
+  --color-surface: #f8fafc;
+  --color-surface-card: #ffffff;
+  --color-surface-muted: #f1f5f9;
+
+  /* Ink */
+  --color-ink-primary: #0f172a;
+  --color-ink-secondary: #475569;
+  --color-ink-muted: #8b8f99;
+
+  /* Brand: deep academic blue */
+  --color-brand-50: #eef4fc;
+  --color-brand-100: #cde2fb;
+  --color-brand-200: #9ec5f4;
+  --color-brand-300: #6da7ec;
+  --color-brand-400: #3987e5;
+  --color-brand-500: #2a78d6;
+  --color-brand-600: #256abf;
+  --color-brand-700: #184f95;
+  --color-brand-800: #133e77;
+  --color-brand-900: #0f2f59;
+
+  /* Status (fixed — never reused as categorical) */
+  --color-status-good: #0ca30c;
+  --color-status-good-bg: #eafbea;
+  --color-status-good-text: #006300;
+  --color-status-warning: #fab219;
+  --color-status-warning-bg: #fef6e6;
+  --color-status-warning-text: #92600a;
+  --color-status-critical: #d03b3b;
+  --color-status-critical-bg: #fdecec;
+  --color-status-critical-text: #a12626;
+
+  /* Categorical (chip/topic hues, fixed order, validated) */
+  --color-cat-1: #2a78d6;
+  --color-cat-2: #eb6834;
+  --color-cat-3: #1baf7a;
+  --color-cat-4: #eda100;
+  --color-cat-5: #e87ba4;
+  --color-cat-6: #008300;
+  --color-cat-7: #4a3aa7;
+  --color-cat-8: #e34948;
+
+  --color-border: #e2e8f0;
+
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
+  --shadow-card-hover: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.05);
+
+  --animate-fade-in: fade-in 0.35s ease-out;
+  --animate-slide-up: slide-up 0.3s ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink-primary);
+  }
+  ::selection {
+    background-color: var(--color-brand-100);
+  }
+}
+
+@layer utilities {
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 9999px;
+  }
+}
