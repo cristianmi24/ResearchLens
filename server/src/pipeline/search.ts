@@ -3,6 +3,7 @@ import * as semanticScholar from "../lib/semanticScholar.js";
 import * as crossref from "../lib/crossref.js";
 import * as arxiv from "../lib/arxiv.js";
 import { generateJSON } from "../lib/qwen.js";
+import { SENIOR_RESEARCHER_SYSTEM_INSTRUCTION } from "./generative.js";
 import type { Article, ResearchArea, ResearchIdeaInput, SourceConsultation } from "../types.js";
 
 const AREAS: ResearchArea[] = [
@@ -25,8 +26,9 @@ export interface IdeaProfile {
 
 /** Usa Qwen para convertir la idea en libre texto en términos de búsqueda bibliográfica. */
 export async function extractIdeaProfile(input: ResearchIdeaInput): Promise<IdeaProfile> {
-  const prompt = `Eres un asistente de investigación académica. A partir de la siguiente idea de investigación, extrae
-información útil para buscarla en bases de datos científicas (OpenAlex, Semantic Scholar, Crossref, arXiv).
+  const prompt = `A partir de la siguiente idea de investigación, extrae información útil para buscarla en bases
+de datos científicas (OpenAlex, Semantic Scholar, Crossref, arXiv), eligiendo los términos que mejor orienten la
+búsqueda hacia literatura realmente pertinente.
 
 Idea original: "${input.rawText}"
 Área declarada por el usuario: ${input.area ?? "no especificada"}
@@ -43,7 +45,7 @@ Responde SOLO con un JSON con esta forma exacta:
   "refinedQuestionPreview": string (una posible pregunta de investigación en español, una sola oración, terminada en "?")
 }`;
 
-  const result = await generateJSON<IdeaProfile>(prompt);
+  const result = await generateJSON<IdeaProfile>(prompt, SENIOR_RESEARCHER_SYSTEM_INSTRUCTION);
   const area = AREAS.includes(result.area) ? result.area : (input.area ?? "otro");
   return {
     keywords: result.keywords?.length ? result.keywords : [input.rawText.slice(0, 60)],

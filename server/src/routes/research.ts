@@ -155,8 +155,13 @@ researchRouter.get("/google-trends", async (req, res) => {
 
 /** Bonus: videos relacionados vía YouTube Data API v3. */
 researchRouter.get("/youtube", async (req, res) => {
-  const q = String(req.query.q ?? "");
-  if (!q) return res.status(400).json({ error: "query param 'q' es requerido" });
-  const videos = await searchVideos(q);
-  res.json(videos);
+  try {
+    const q = String(req.query.q ?? "");
+    if (!q) return res.status(400).json({ error: "query param 'q' es requerido" });
+    const videos = await searchVideos(q);
+    res.json(videos);
+  } catch (err) {
+    console.error("[GET /research/youtube]", err);
+    res.status(502).json({ error: (err as Error).message });
+  }
 });

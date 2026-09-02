@@ -1,5 +1,6 @@
 import * as openAlex from "../lib/openalex.js";
 import { generateJSON } from "../lib/qwen.js";
+import { SENIOR_RESEARCHER_SYSTEM_INSTRUCTION } from "./generative.js";
 import type {
   Article,
   ExplorationLevel,
@@ -72,8 +73,8 @@ export async function buildDiagnosis(params: DiagnosisInputs): Promise<{
   const simLabel = averageSimilarityLabel(params.articles);
   const diffLabel = differentiationLabel(params.articles);
 
-  const narrativePrompt = `Eres un asistente de investigación. Con base ÚNICAMENTE en estos datos reales ya
-calculados (no inventes cifras nuevas), redacta en español un diagnóstico breve para el investigador.
+  const narrativePrompt = `Con base ÚNICAMENTE en estos datos reales ya calculados (no inventes cifras nuevas),
+redacta en español un diagnóstico breve para el investigador sobre hacia dónde conviene orientar el estudio.
 
 Idea: "${params.input.rawText}"
 Estudios relacionados encontrados en fuentes académicas: ${relatedStudiesCount}
@@ -91,7 +92,7 @@ Responde SOLO con este JSON:
 
   let narrative: DiagnosisNarrative;
   try {
-    narrative = await generateJSON<DiagnosisNarrative>(narrativePrompt);
+    narrative = await generateJSON<DiagnosisNarrative>(narrativePrompt, SENIOR_RESEARCHER_SYSTEM_INSTRUCTION);
   } catch (err) {
     console.error("[diagnosis] Qwen narrativa falló, uso fallback:", (err as Error).message);
     narrative = {

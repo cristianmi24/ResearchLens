@@ -24,3 +24,11 @@ export async function me(): Promise<AuthUser> {
   const { user } = await apiFetch<{ user: AuthUser }>("/auth/me");
   return user;
 }
+
+/** Intercambia un token de sesión de Clerk (Google/Microsoft/Facebook) por nuestro JWT propio. */
+export async function clerkSync(clerkToken: string): Promise<AuthResponse> {
+  return apiFetch<AuthResponse>("/auth/clerk-sync", {
+    method: "POST",
+    body: JSON.stringify({ clerkToken }),
+  });
+}

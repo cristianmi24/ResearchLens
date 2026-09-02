@@ -1,11 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 export function RequireAuth() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div className="min-h-dvh flex items-center justify-center text-sm text-ink-muted">Cargando…</div>;
+    return <PageLoader label="Verificando tu sesión…" />;
   }
 
   if (!isAuthenticated) {

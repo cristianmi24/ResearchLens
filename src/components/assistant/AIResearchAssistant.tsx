@@ -1,15 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { MessageCircleQuestion, Send, Sparkles, X } from "lucide-react";
+import { ChevronRight, GraduationCap, Send, Sparkles, X } from "lucide-react";
 import type { AssistantMessage } from "@/types/assistant";
 import { askAssistant } from "@/services/llmApi";
 import { assistantSuggestedQuestions, mockAssistantWelcome } from "@/data/mockAssistant";
+import { helpKnowledgeBase } from "@/data/helpKnowledgeBase";
+import { findBestHelpAnswer, MIN_HELP_RELEVANCE } from "@/utils/helpMatcher";
+import { OPEN_ASSISTANT_EVENT, type OpenAssistantDetail } from "@/utils/assistantBus";
+import { AssistantMessageBody } from "@/components/assistant/AssistantMessageBody";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
 
 let messageId = 1;
 function nextId() {
   return `msg-${messageId++}`;
+}
+
+function SourceBadge({ source }: { source: AssistantMessage["source"] }) {
+  if (!source) return null;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide rounded-full px-2 py-0.5 mb-1.5",
+        source === "local" ? "bg-status-good-bg text-status-good-text" : "bg-brand-50 text-brand-700"
+      )}
+    >
+      {source === "local" ? "Sin IA · instantáneo" : "Generado por IA · Qwen"}
+    </span>
+  );
 }
 
 export function AIResearchAssistant() {
@@ -27,13 +45,30 @@ export function AIResearchAssistant() {
       { id: nextId(), role: "user", text: trimmed, createdAt: new Date().toISOString() },
     ]);
     setInput("");
+
+    // Primero se busca en la información fija de cómo funciona ResearchLens (sin IA, sin red, sin
+    // costo). Solo si no hay una coincidencia razonable ahí, se le pregunta a Qwen sobre los artículos
+    // ya recuperados para esta búsqueda.
+    const localMatch = findBestHelpAnswer(trimmed, helpKnowledgeBase);
+    if (localMatch && localMatch.score >= MIN_HELP_RELEVANCE) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId(),
+          role: "assistant",
+          text: localMatch.entry.answer,
+          createdAt: new Date().toISOString(),
+          source: "local",
+        },
+      ]);
+      return;
+    }
+
     setIsThinking(true);
-
     const response = await askAssistant(trimmed);
-
     setMessages((prev) => [
       ...prev,
-      { id: nextId(), role: "assistant", createdAt: new Date().toISOString(), ...response },
+      { id: nextId(), role: "assistant", createdAt: new Date().toISOString(), source: "ai", ...response },
     ]);
     setIsThinking(false);
   }
@@ -42,6 +77,18 @@ export function AIResearchAssistant() {
     e.preventDefault();
     sendQuestion(input);
   }
+
+  // Permite que otras páginas (Home, Settings, ...) abran el asistente con una pregunta ya cargada
+  // (ej. el botón "Ver cómo funciona"), sin tener que levantar este estado a un contexto compartido.
+  useEffect(() => {
+    function handleOpenEvent(e: Event) {
+      const detail = (e as CustomEvent<OpenAssistantDetail>).detail;
+      setOpen(true);
+      if (detail?.question) sendQuestion(detail.question);
+    }
+    window.addEventListener(OPEN_ASSISTANT_EVENT, handleOpenEvent);
+    return () => window.removeEventListener(OPEN_ASSISTANT_EVENT, handleOpenEvent);
+  }, [sendQuestion]);
 
   return (
     <>
@@ -65,24 +112,41 @@ export function AIResearchAssistant() {
             className="absolute inset-0 bg-ink-primary/40 animate-fade-in"
           />
           <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl animate-slide-up flex flex-col">
-            <div className="flex items-center justify-between px-5 h-16 border-b border-border shrink-0">
-              <div className="flex items-center gap-2">
-                <MessageCircleQuestion size={20} className="text-brand-600" />
-                <span className="font-semibold text-ink-primary">Research Assistant</span>
+            <div className="relative shrink-0 border-b border-border">
+              <div
+                className="h-1.5"
+                style={{
+                  background:
+                    "linear-gradient(90deg, var(--color-brand-600) 0%, var(--color-cat-7) 55%, var(--color-cat-3) 100%)",
+                }}
+              />
+              <div className="flex items-center justify-between px-5 h-16">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
+                    <GraduationCap size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-serif font-semibold text-ink-primary leading-tight truncate">
+                      Asistente de investigación
+                    </p>
+                    <p className="text-xs text-ink-muted leading-tight">Cómo funciona ResearchLens y tu búsqueda</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  aria-label="Cerrar"
+                  className="p-1.5 rounded-lg text-ink-secondary hover:bg-surface-muted focus-ring shrink-0"
+                >
+                  <X size={20} />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Cerrar"
-                className="p-1.5 rounded-lg text-ink-secondary hover:bg-surface-muted focus-ring"
-              >
-                <X size={20} />
-              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-thin">
               {messages.map((message) => (
-                <div key={message.id} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
+                <div key={message.id} className={cn("flex flex-col", message.role === "user" ? "items-end" : "items-start")}>
+                  {message.role === "assistant" && <SourceBadge source={message.source} />}
                   <div
                     className={cn(
                       "max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed",
@@ -91,12 +155,16 @@ export function AIResearchAssistant() {
                         : "bg-surface-muted text-ink-primary"
                     )}
                   >
-                    <p>{message.text}</p>
+                    {message.role === "assistant" ? (
+                      <AssistantMessageBody text={message.text} />
+                    ) : (
+                      <p>{message.text}</p>
+                    )}
                     {message.citations && message.citations.length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-white/20 space-y-1">
-                        <p className="text-xs opacity-80">Fuentes citadas:</p>
+                      <div className="mt-2 pt-2 border-t border-ink-primary/10 space-y-1">
+                        <p className="text-xs text-ink-muted font-medium">Fuentes citadas</p>
                         {message.citations.map((c) => (
-                          <p key={c.articleId} className="text-xs opacity-90 leading-snug">
+                          <p key={c.articleId} className="text-xs text-ink-secondary leading-snug">
                             {c.title} · DOI: {c.doi}
                           </p>
                         ))}
@@ -106,7 +174,8 @@ export function AIResearchAssistant() {
                 </div>
               ))}
               {isThinking && (
-                <div className="flex justify-start">
+                <div className="flex flex-col items-start">
+                  <SourceBadge source="ai" />
                   <div className="rounded-xl px-3.5 py-2.5 text-sm bg-surface-muted text-ink-muted">
                     Buscando en la literatura recuperada...
                   </div>
@@ -115,15 +184,17 @@ export function AIResearchAssistant() {
             </div>
 
             {messages.length <= 1 && (
-              <div className="px-5 pb-2 space-y-1.5">
+              <div className="px-5 pb-3 space-y-1.5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">Preguntas frecuentes</p>
                 {assistantSuggestedQuestions.map((q) => (
                   <button
                     key={q}
                     type="button"
                     onClick={() => sendQuestion(q)}
-                    className="block w-full text-left text-xs rounded-lg border border-border px-3 py-2 text-ink-secondary hover:bg-surface-muted focus-ring"
+                    className="flex w-full items-center justify-between gap-2 text-left text-xs rounded-lg border border-border px-3 py-2 text-ink-secondary hover:border-brand-300 hover:bg-surface-muted transition-colors focus-ring"
                   >
-                    {q}
+                    <span>{q}</span>
+                    <ChevronRight size={14} className="shrink-0 text-ink-muted" />
                   </button>
                 ))}
               </div>

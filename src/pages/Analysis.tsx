@@ -27,6 +27,7 @@ export function Analysis() {
   const { ideaInput, runAnalysis } = useResearch();
   const [activeIndex, setActiveIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const startedAnalysis = useRef(false);
 
   useEffect(() => {
@@ -42,6 +43,15 @@ export function Analysis() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!ideaInput) return;
+    // El backend consulta varias fuentes académicas reales (algunas con límite propio de solicitudes,
+    // como arXiv o Semantic Scholar) más varias llamadas a la IA: la duración real varía, así que se
+    // muestra cuánto tiempo lleva corriendo en vez de dejar los pasos congelados sin explicación.
+    const timer = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+    return () => clearInterval(timer);
+  }, [ideaInput]);
 
   useEffect(() => {
     if (activeIndex === stepLabels.length - 1 && !startedAnalysis.current) {
@@ -81,6 +91,10 @@ export function Analysis() {
         <h1 className="text-xl font-semibold text-ink-primary">
           Estamos convirtiendo tu idea en conceptos investigables...
         </h1>
+        <p className="text-sm text-ink-muted mt-2">
+          Suele tardar entre 15 y 30 segundos (consultamos varias fuentes académicas reales, algunas con
+          límite propio de solicitudes) — llevas {elapsedSeconds}s.
+        </p>
       </div>
 
       <AnalysisProgress steps={buildSteps(activeIndex)} />

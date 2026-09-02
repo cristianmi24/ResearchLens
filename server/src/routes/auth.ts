@@ -1,7 +1,15 @@
 import { Router } from "express";
 import { randomUUID } from "node:crypto";
-import { createUser, findUserByEmail, findUserById } from "../db/users.js";
+import {
+  createUser,
+  createUserFromClerk,
+  findUserByClerkId,
+  findUserByEmail,
+  findUserById,
+  linkClerkId,
+} from "../db/users.js";
 import { hashPassword, verifyPassword, signToken } from "../lib/auth.js";
+import { resolveClerkProfile } from "../lib/clerk.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 
 export const authRouter = Router();
@@ -56,7 +64,7 @@ authRouter.post("/login", async (req, res) => {
     }
 
     const user = await findUserByEmail(email);
-    if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    if (!user || !user.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
       return res.status(401).json({ error: "Correo o contraseña incorrectos" });
     }
 
@@ -64,6 +72,39 @@ authRouter.post("/login", async (req, res) => {
     res.json({ token, user: publicUser(user) });
   } catch (err) {
     console.error("[POST /auth/login]", err);
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+authRouter.post("/clerk-sync", async (req, res) => {
+  try {
+    const { clerkToken } = req.body as { clerkToken?: string };
+    if (!clerkToken) {
+      return res.status(400).json({ error: "clerkToken es requerido" });
+    }
+
+    const profile = await resolveClerkProfile(clerkToken);
+
+    let user = await findUserByClerkId(profile.clerkUserId);
+    if (!user) {
+      // Ya existe una cuenta con ese correo (creada con contraseña propia): se vincula,
+      // no se duplica la cuenta.
+      const existingByEmail = await findUserByEmail(profile.email);
+      user = existingByEmail
+        ? await linkClerkId(existingByEmail.id, profile.clerkUserId)
+        : await createUserFromClerk(
+            randomUUID(),
+            profile.email,
+            profile.clerkUserId,
+            profile.firstName || "Usuario",
+            profile.lastName || "",
+          );
+    }
+
+    const token = signToken(user.id);
+    res.json({ token, user: publicUser(user) });
+  } catch (err) {
+    console.error("[POST /auth/clerk-sync]", err);
     res.status(502).json({ error: (err as Error).message });
   }
 });

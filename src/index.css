@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Atkinson Hyperlegible: diseñada para máxima legibilidad/accesibilidad, usada por
+     universidades y proyectos educativos — texto del sistema. Crimson Pro: serif académica
+     clásica (papers, revistas científicas) — títulos y encabezados. */
+  --font-sans: "Atkinson Hyperlegible", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Crimson Pro", Georgia, "Times New Roman", serif;
 
   /* Surfaces */
   --color-surface: #f8fafc;
@@ -71,6 +75,11 @@
   body {
     background-color: var(--color-surface);
     color: var(--color-ink-primary);
+  }
+  /* Encabezados en serif académica en toda la app (papers, revistas científicas);
+     el texto de cuerpo se queda en la sans accesible para no sacrificar legibilidad. */
+  h1, h2, h3 {
+    font-family: var(--font-serif);
   }
   ::selection {
     background-color: var(--color-brand-100);

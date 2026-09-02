@@ -6,6 +6,7 @@ services:
       args:
         # Misma URL relativa: el navegador llama a /api y nginx lo proxea al backend.
         VITE_API_BASE_URL: /api
+        VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
     image: cristianmi2404/researchlens:latest
     container_name: researchlens
     restart: unless-stopped

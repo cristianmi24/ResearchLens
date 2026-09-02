@@ -737,6 +737,31 @@
   margin-top: 0.4rem;
 }
 
+.trama-landing .terms-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  cursor: pointer;
+}
+.trama-landing .terms-check input[type="checkbox"] {
+  margin-top: 3px;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--brass);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.trama-landing .terms-check span {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--paper-dim);
+}
+.trama-landing .terms-check a {
+  color: var(--brass);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .trama-landing .auth-error {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.78rem;
@@ -757,6 +782,74 @@
   opacity: 0.6;
   cursor: default;
   transform: none;
+}
+
+.trama-landing .social-auth {
+  margin-top: 1.2rem;
+}
+.trama-landing .social-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.9rem;
+}
+.trama-landing .social-auth-divider::before,
+.trama-landing .social-auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line-faint);
+}
+.trama-landing .social-auth-divider span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  color: var(--paper-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.trama-landing .social-auth-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+.trama-landing .social-auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  color: var(--paper);
+  background: rgba(44, 38, 32, 0.03);
+  border: 1px solid var(--line-faint);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+.trama-landing .social-auth-btn:hover:not(:disabled) {
+  background: rgba(44, 38, 32, 0.06);
+  border-color: var(--brass);
+}
+.trama-landing .social-auth-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.trama-landing .social-auth-btn.pending {
+  opacity: 1;
+  border-color: var(--brass);
+  animation: social-auth-pulse 1s ease-in-out infinite;
+}
+@keyframes social-auth-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@media (max-width: 480px) {
+  .trama-landing .social-auth-buttons {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+  }
+  .trama-landing .social-auth-btn {
+    height: 36px;
+  }
 }
 
 /* ---------- RESPONSIVE ---------- */

@@ -58,6 +58,12 @@ export const config = {
     jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
   },
 
+  // Clerk solo resuelve el handshake OAuth (Google/Microsoft/Facebook); la
+  // sesión que usa el resto de la app sigue siendo el JWT propio de arriba.
+  clerk: {
+    secretKey: process.env.CLERK_SECRET_KEY ?? "",
+  },
+
   // Tope de análisis por usuario por día. Cada análisis dispara ~3 llamadas de
   // texto + varias de embeddings a Qwen; con un saldo de tokens compartido y
   // limitado, esto evita que un solo usuario agote el saldo de todos.

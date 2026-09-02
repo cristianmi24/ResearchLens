@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Microscope } from "lucide-react";
+import { ArrowLeft, Microscope, ShieldCheck } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export function PrivacyPolicy() {
@@ -60,6 +60,25 @@ export function PrivacyPolicy() {
               En una base de datos Postgres administrada (Neon), con conexión cifrada (TLS). No compartimos ni
               vendemos tus datos a terceros con fines comerciales.
             </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-status-good-bg text-status-good-text">
+              <ShieldCheck size={18} />
+            </div>
+            <div className="min-w-0">
+              <CardTitle>Cómo protegemos tus datos</CardTitle>
+              <CardDescription>
+                Tu contraseña nunca se guarda en texto plano: se cifra con bcrypt (hash irreversible). Cada sesión
+                se identifica con un JWT firmado y con expiración. El servidor limita cuántos intentos de inicio de
+                sesión puede hacer una misma IP en pocos minutos, para dificultar ataques de fuerza bruta, y aplica
+                cabeceras HTTP de seguridad (Helmet) contra ataques comunes como XSS o sniffing de contenido. Si
+                inicias sesión con Google, Microsoft o Facebook, ese paso lo resuelve Clerk: nosotros nunca vemos ni
+                guardamos tu contraseña de esas cuentas, solo tu nombre y correo para identificarte en ResearchLens.
+              </CardDescription>
+            </div>
           </CardHeader>
         </Card>
 

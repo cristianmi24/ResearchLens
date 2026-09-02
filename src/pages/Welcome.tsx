@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FileText, GraduationCap, Library, Menu, SquarePlay, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/api";
+import { isClerkEnabled } from "@/lib/clerkConfig";
+import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import "./Welcome.css";
 
 type AuthMode = "register" | "login";
@@ -18,7 +20,6 @@ interface TeamMember {
   stampRight: string;
 }
 
-// TODO: reemplazar las dos entradas "Pendiente" con los datos reales del resto del equipo.
 const teamMembers: TeamMember[] = [
   {
     tab: "AUTOR",
@@ -29,20 +30,20 @@ const teamMembers: TeamMember[] = [
     stampRight: "GRUPO EDUTLAN",
   },
   {
-    tab: "EQUIPO",
-    name: "Pendiente",
-    role: "Pendiente",
-    bio: "Información pendiente de completar.",
-    stampLeft: "—",
-    stampRight: "—",
+    tab: "AUTORA",
+    name: "Andreina Esther Sami Almanza",
+    role: "Estudiante de Tecnología e Informática",
+    bio: "Vinculada a la Universidad de Córdoba (Colombia), coautora de este proyecto dentro de la asignatura de Ciencia de Datos.",
+    stampLeft: "UNIV. DE CÓRDOBA",
+    stampRight: "GRUPO EDUTLAN",
   },
   {
-    tab: "EQUIPO",
-    name: "Pendiente",
-    role: "Pendiente",
-    bio: "Información pendiente de completar.",
-    stampLeft: "—",
-    stampRight: "—",
+    tab: "DOCENTE",
+    name: "Alexander Toscano",
+    role: "Docente de la asignatura de Ciencia de Datos",
+    bio: "Docente de la Universidad de Córdoba a cargo de la asignatura de Ciencia de Datos, en cuyo marco se desarrolló este proyecto.",
+    stampLeft: "UNIV. DE CÓRDOBA",
+    stampRight: "CIENCIA DE DATOS",
   },
 ];
 
@@ -135,6 +136,7 @@ export function Welcome() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const heroSvg = useMemo(() => buildHeroSvg(), []);
 
@@ -177,6 +179,12 @@ export function Welcome() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (mode === "register" && !acceptedTerms) {
+      setError("Debes aceptar los términos y condiciones para crear una cuenta.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       if (mode === "register") {
@@ -583,6 +591,33 @@ export function Welcome() {
                   </div>
                 </div>
 
+                <AnimatePresence initial={false}>
+                  {mode === "register" && (
+                    <motion.label
+                      className="terms-check"
+                      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      animate={{ opacity: 1, height: "auto", marginBottom: "0.9rem" }}
+                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms}
+                        onChange={(e) => setAcceptedTerms(e.target.checked)}
+                        required
+                      />
+                      <span>
+                        Acepto los{" "}
+                        <Link to="/privacidad" target="_blank" rel="noreferrer">
+                          términos y condiciones y la política de privacidad
+                        </Link>
+                        .
+                      </span>
+                    </motion.label>
+                  )}
+                </AnimatePresence>
+
                 {error && (
                   <motion.p
                     className="auth-error"
@@ -596,13 +631,15 @@ export function Welcome() {
                 <motion.button
                   type="submit"
                   className="btn-primary auth-submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || (mode === "register" && !acceptedTerms)}
                   whileHover={isSubmitting ? undefined : { y: -2 }}
                   whileTap={isSubmitting ? undefined : { scale: 0.98 }}
                 >
                   {isSubmitting ? "Procesando..." : mode === "register" ? "Crear cuenta y continuar" : "Iniciar sesión"}
                 </motion.button>
               </form>
+
+              {isClerkEnabled && <SocialLoginButtons />}
             </motion.div>
           </motion.div>
         )}

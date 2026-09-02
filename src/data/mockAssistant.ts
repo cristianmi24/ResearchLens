@@ -3,15 +3,16 @@ import type { AssistantMessage } from "@/types/assistant";
 export const mockAssistantWelcome: AssistantMessage = {
   id: "msg-welcome",
   role: "assistant",
-  text: "Hola, soy tu asistente de investigación. Puedo responder preguntas sobre la literatura que encontramos para tu idea, siempre citando las fuentes consultadas. ¿Qué te gustaría saber?",
+  text: "Hola, soy tu asistente de investigación. Puedo explicarte cómo funciona ResearchLens (sin gastar IA para eso, respondo al instante) y también responder preguntas sobre la literatura que encontramos para tu idea, citando siempre las fuentes consultadas. ¿Qué te gustaría saber?",
   createdAt: new Date().toISOString(),
+  source: "local",
 };
 
 export const assistantSuggestedQuestions: string[] = [
+  "Muéstrame una demo de cómo funciona todo",
   "¿Por qué mi tema aparece como moderadamente explorado?",
   "¿Qué diferencia hay entre estos dos artículos?",
   "¿Cómo puedo hacer mi tema más específico?",
-  "¿Qué población está menos estudiada?",
   "¿Qué variables aparecen con mayor frecuencia?",
 ];
 

@@ -1,9 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
-import { Database, Globe, LogOut, ShieldCheck, User } from "lucide-react";
+import { Database, Globe, LogOut, PlayCircle, ShieldCheck, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
+import { openAssistantWithQuestion } from "@/utils/assistantBus";
+
+const DEMO_QUESTION = "Muéstrame una demo de cómo funciona todo";
 
 function initials(firstName?: string, lastName?: string, email?: string): string {
   if (firstName || lastName) {
@@ -40,9 +43,23 @@ export function Settings() {
 
       <motion.div variants={fadeUp}>
         <Card className="overflow-hidden">
-          <div className="h-16 bg-gradient-to-r from-brand-500 via-brand-600 to-brand-700" />
+          <div
+            className="h-20 relative"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-brand-600) 0%, var(--color-cat-7) 60%, var(--color-cat-3) 100%)",
+            }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{ backgroundImage: "radial-gradient(circle at 15% 20%, rgba(255,255,255,0.25), transparent 45%)" }}
+            />
+          </div>
           <CardContent className="-mt-8 pb-5">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-white text-xl font-semibold ring-4 ring-white shadow-[var(--shadow-card-hover)]">
+            <div
+              className="flex h-16 w-16 items-center justify-center rounded-full text-white text-xl font-semibold ring-4 ring-white shadow-[var(--shadow-card-hover)]"
+              style={{ background: "linear-gradient(135deg, var(--color-brand-500), var(--color-cat-7))" }}
+            >
               {initials(user?.firstName, user?.lastName, user?.email)}
             </div>
             <div className="mt-3">
@@ -55,6 +72,10 @@ export function Settings() {
               <Button variant="secondary" onClick={handleLogout}>
                 <LogOut size={16} />
                 Cerrar sesión
+              </Button>
+              <Button variant="outline" onClick={() => openAssistantWithQuestion(DEMO_QUESTION)}>
+                <PlayCircle size={16} />
+                Ver cómo funciona
               </Button>
               <Link to="/privacidad">
                 <Button variant="outline">

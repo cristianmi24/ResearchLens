@@ -10,15 +10,31 @@ import type {
   Topic,
 } from "../types.js";
 
+/**
+ * Persona aplicada como system instruction a todo prompt que decide "hacia dónde"
+ * debe orientarse una investigación (oportunidades, delimitación, preguntas).
+ * Un investigador senior prioriza rigor metodológico y viabilidad real sobre
+ * originalidad superficial, y nunca rellena huecos de evidencia con inventos.
+ */
+export const SENIOR_RESEARCHER_SYSTEM_INSTRUCTION = `Actúas como un investigador senior con más de 15 años de
+experiencia dirigiendo líneas de investigación académica, evaluando artículos como par (peer review) en revistas
+indexadas y asesorando tesis de maestría y doctorado. Tu criterio prioriza siempre:
+1) Rigor metodológico y viabilidad real del estudio, no solo originalidad superficial.
+2) Anclar cada juicio ÚNICAMENTE en los datos reales entregados (artículos y temas ya recuperados de fuentes
+   académicas). Está PROHIBIDO inventar estudios, cifras, autores o tendencias que no estén en el contexto dado.
+3) Ser explícito cuando la evidencia disponible es insuficiente para orientar una decisión, en vez de rellenar el
+   vacío con suposiciones.
+4) Redactar en español, con lenguaje directo y accionable para quien va a ejecutar la investigación.`;
+
 export async function buildOpportunities(
   input: ResearchIdeaInput,
   diagnosis: ResearchDiagnosis,
   topics: Topic[],
   articles: Article[],
 ): Promise<{ opportunities: Opportunity[]; delimitationOptions: DelimitationOption[] }> {
-  const prompt = `Eres un asistente de investigación académica. Identifica oportunidades de investigación
-delimitando la idea del usuario, basándote SOLO en los datos reales dados abajo (temas y artículos ya
-recuperados de bases de datos científicas). No inventes estadísticas nuevas.
+  const prompt = `Identifica oportunidades de investigación delimitando la idea del usuario, basándote SOLO en los
+datos reales dados abajo (temas y artículos ya recuperados de bases de datos científicas). No inventes
+estadísticas nuevas.
 
 Idea del usuario:
 - Texto: "${input.rawText}"
@@ -56,7 +72,7 @@ Responde SOLO con este JSON:
   const result = await generateJSON<{
     opportunities: Omit<Opportunity, "id">[];
     delimitationOptions: Omit<DelimitationOption, "id">[];
-  }>(prompt);
+  }>(prompt, SENIOR_RESEARCHER_SYSTEM_INSTRUCTION);
 
   return {
     opportunities: result.opportunities.map((o, i) => ({ ...o, id: `opp-${i + 1}` })),
@@ -69,8 +85,8 @@ export async function refineQuestion(
   diagnosis: ResearchDiagnosis,
   topics: Topic[],
 ): Promise<ResearchQuestionProposal[]> {
-  const prompt = `Eres un asistente de investigación académica. Propones preguntas de investigación bien
-delimitadas a partir de los campos que llenó el usuario y del panorama real de literatura ya recuperado.
+  const prompt = `Propón preguntas de investigación bien delimitadas a partir de los campos que llenó el usuario y
+del panorama real de literatura ya recuperado.
 
 Campos del usuario:
 - Población: ${formInput.population}
@@ -100,6 +116,6 @@ Responde SOLO con este JSON, un array de 3 propuestas:
   }
 ]`;
 
-  const result = await generateJSON<Omit<ResearchQuestionProposal, "id">[]>(prompt);
+  const result = await generateJSON<Omit<ResearchQuestionProposal, "id">[]>(prompt, SENIOR_RESEARCHER_SYSTEM_INSTRUCTION);
   return result.map((p, i) => ({ ...p, id: `prop-${String.fromCharCode(97 + i)}` }));
 }

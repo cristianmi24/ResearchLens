@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { config } from "./config.js";
 import { initSchema } from "./db/index.js";
 import { authRouter } from "./routes/auth.js";
@@ -10,8 +12,20 @@ import { requireAuth } from "./middleware/requireAuth.js";
 
 const app = express();
 
+// Cabeceras HTTP de seguridad (protección contra XSS, sniffing, clickjacking, etc.)
+app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
+
+// Limita intentos de login/registro por IP para mitigar ataques de fuerza bruta
+// y credential stuffing sobre datos personales (correo/contraseña).
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Demasiados intentos. Intenta de nuevo en unos minutos." },
+});
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -22,7 +36,7 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-app.use("/api/auth", authRouter);
+app.use("/api/auth", authLimiter, authRouter);
 
 // A partir de aquí, todas las rutas requieren `Authorization: Bearer <token>`.
 app.use("/api/research", requireAuth, researchRouter);

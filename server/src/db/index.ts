@@ -10,6 +10,13 @@ export const pool = config.databaseUrl
     })
   : null;
 
+// Neon cierra conexiones idle sin previo aviso; pg emite un evento 'error' en
+// el pool cuando eso pasa. Sin este listener, ese error queda sin manejar y
+// tumba todo el proceso de Node (no solo la query que estaba en curso).
+pool?.on("error", (err) => {
+  console.warn("[db] error en cliente idle del pool:", err.message);
+});
+
 export async function query<T extends pg.QueryResultRow = any>(text: string, params?: unknown[]) {
   if (!pool) throw new Error("DATABASE_URL no está configurada");
   return pool.query<T>(text, params);
@@ -19,7 +26,7 @@ const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
+  password_hash TEXT,
   first_name TEXT NOT NULL DEFAULT '',
   last_name TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -75,6 +82,12 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT NOT NULL DEFAULT '';
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT NOT NULL DEFAULT '';
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_research_sessions_user_id ON research_sessions(user_id);
+
+-- Login social vía Clerk (Google/Microsoft/Facebook): esas cuentas no tienen
+-- contraseña propia, y se identifican por el id de usuario de Clerk.
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS clerk_user_id TEXT UNIQUE;
+CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id ON users(clerk_user_id);
 `;
 
 export async function initSchema() {

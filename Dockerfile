@@ -20,6 +20,12 @@ COPY src ./src
 ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
+# Vite "hornea" las variables VITE_* dentro del bundle en este paso de build,
+# no en runtime: si Railway no las pasa como build arg aquí, quedan vacías en
+# producción aunque estén configuradas en las variables del servicio.
+ARG VITE_CLERK_PUBLISHABLE_KEY=""
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+
 RUN npm run build
 
 # ---------------------------------------------------------------------------

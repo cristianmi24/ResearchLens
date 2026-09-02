@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { AuthUser } from "@/types/auth";
 import { getToken, setToken as persistToken } from "@/services/api";
 import * as authApi from "@/services/authApi";
+import "@/lib/clerkConfig";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -11,6 +12,8 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => void;
+  /** Aplica una sesión ya resuelta externamente (ej. tras sincronizar un login social de Clerk). */
+  setSession: (token: string, sessionUser: AuthUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -22,6 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     persistToken(null);
     setUser(null);
+    // Si el usuario entró con Google/Microsoft/Facebook/Apple/GitHub, Clerk mantiene su propia sesión
+    // activa en el navegador aparte de este JWT. Sin cerrarla aquí, el próximo intento de login social
+    // falla con "You're already signed in" aunque el usuario ya se deslogueó de ResearchLens.
+    void window.Clerk?.signOut().catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -56,9 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(newUser);
   }, []);
 
+  const setSession = useCallback((token: string, sessionUser: AuthUser) => {
+    persistToken(token);
+    setUser(sessionUser);
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isLoading, isAuthenticated: Boolean(user), login, register, logout }),
-    [user, isLoading, login, register, logout],
+    () => ({ user, isLoading, isAuthenticated: Boolean(user), login, register, logout, setSession }),
+    [user, isLoading, login, register, logout, setSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

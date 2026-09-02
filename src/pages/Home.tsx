@@ -3,6 +3,9 @@ import { motion, type Variants } from "framer-motion";
 import { ArrowRight, Compass, PlayCircle, Puzzle, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { openAssistantWithQuestion } from "@/utils/assistantBus";
+
+const DEMO_QUESTION = "Muéstrame una demo de cómo funciona todo";
 
 const discoveryCards = [
   {
@@ -85,12 +88,10 @@ export function Home() {
               <ArrowRight size={18} />
             </Button>
           </Link>
-          <a href="#como-funciona">
-            <Button size="lg" variant="outline">
-              <PlayCircle size={18} />
-              Ver cómo funciona
-            </Button>
-          </a>
+          <Button size="lg" variant="outline" onClick={() => openAssistantWithQuestion(DEMO_QUESTION)}>
+            <PlayCircle size={18} />
+            Ver cómo funciona
+          </Button>
         </motion.div>
       </section>
 
