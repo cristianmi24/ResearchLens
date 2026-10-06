@@ -1,15 +1,13 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Compass, Microscope } from "lucide-react";
+import { ArrowLeft, Compass } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 export function NotFound() {
   return (
     <div className="min-h-dvh bg-surface px-4 py-10 flex items-center justify-center">
       <div className="max-w-md w-full text-center space-y-6 animate-fade-in">
-        <div className="flex items-center justify-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
-            <Microscope size={18} />
-          </div>
+        <div className="flex items-center justify-center gap-2.5">
+          <img src="/logo.png" alt="ResearchLens logo" className="h-8 w-8 object-contain rounded-lg shadow-xs" />
           <span className="font-semibold text-ink-primary">ResearchLens</span>
         </div>
 

@@ -1,6 +1,6 @@
 import * as openAlex from "../lib/openalex.js";
 import { generateJSON } from "../lib/qwen.js";
-import { SENIOR_RESEARCHER_SYSTEM_INSTRUCTION } from "./generative.js";
+import { SENIOR_RESEARCHER_SYSTEM_INSTRUCTION, languageName, levelGuidance, rocas } from "./prompts.js";
 import type {
   Article,
   ExplorationLevel,
@@ -73,33 +73,60 @@ export async function buildDiagnosis(params: DiagnosisInputs): Promise<{
   const simLabel = averageSimilarityLabel(params.articles);
   const diffLabel = differentiationLabel(params.articles);
 
-  const narrativePrompt = `Con base ÚNICAMENTE en estos datos reales ya calculados (no inventes cifras nuevas),
-redacta en español un diagnóstico breve para el investigador sobre hacia dónde conviene orientar el estudio.
+  const lang = params.input.language ?? "es";
+  const langName = languageName(lang);
 
-Idea: "${params.input.rawText}"
-Estudios relacionados encontrados en fuentes académicas: ${relatedStudiesCount}
-Nivel de exploración calculado: ${level} (bajo=poco explorado/alta oportunidad, alto=muy explorado)
-Similitud promedio con la literatura recuperada: ${simLabel}
-Tendencia de publicaciones en los últimos años: ${trend}
-Diferenciación potencial estimada: ${diffLabel}
+  const narrativePrompt = rocas({
+    role: `Eres el asesor que interpreta los indicadores cuantitativos del panorama de una idea para decidir hacia dónde conviene orientar el estudio.`,
+    objective: `Redactar un diagnóstico breve, honesto y accionable que traduzca las cifras reales en una orientación concreta para el investigador, sin inventar ninguna cifra nueva.`,
+    context: `Idea: "${params.input.rawText}"
+Nivel académico: ${params.input.academicLevel ?? "pregrado"}. ${levelGuidance(params.input.academicLevel)}
 
-Responde SOLO con este JSON:
+Indicadores calculados (evidencia directa; no los modifiques):
+- Estudios relacionados encontrados en fuentes académicas: ${relatedStudiesCount}
+- Nivel de exploración calculado: ${level} (bajo=poco explorado/más espacio para aportar, alto=muy explorado). Se deriva del conteo de obras para los términos de búsqueda: menos de 150 = bajo, 150 a 800 = moderado, más de 800 = alto.
+- Similitud promedio con la literatura recuperada: ${simLabel}
+- Tendencia de publicaciones en los últimos años: ${trend}
+- Diferenciación potencial estimada (se deriva de la similitud): ${diffLabel}
+
+Idioma de salida: ${langName}.`,
+    actions: `1. Interpreta las cifras tal cual: son la única evidencia directa disponible; no agregues números ni estudios.
+2. Relaciona nivel de exploración, tendencia y similitud entre sí (ej.: muy explorado y creciente exige delimitar con precisión; poco explorado puede ser oportunidad o una búsqueda demasiado estrecha, y debes decir cuál de las dos hay que descartar).
+3. Matiza: el conteo mide volumen de literatura para los términos buscados, no su calidad ni la saturación del problema específico del usuario; una similitud alta no implica que la idea ya esté resuelta. Presenta lo que infieras como inferencia, no como hecho.
+4. Adapta la orientación al nivel académico indicado.
+5. Cierra con la siguiente decisión concreta (delimitar población, contexto o método; ampliar o afinar la búsqueda; etc.).`,
+    output: `Responde SOLO con este JSON (con todos los valores redactados en ${langName}):
 {
-  "label": string (2-4 palabras, ej. "Moderadamente explorado"),
-  "explanation": string (2-3 frases explicando el diagnóstico anclado en las cifras dadas),
-  "disclaimer": string (1 frase breve recordando que son estimaciones basadas en las fuentes consultadas)
-}`;
+  "label": string (2-4 palabras, ej. "${lang === "en" ? "Moderately explored" : lang === "pt" ? "Moderadamente explorado" : "Moderadamente explorado"}"),
+  "explanation": string (máximo 3 frases en ${langName}: primero la evidencia con las cifras dadas, luego la inferencia con matiz y por último la siguiente decisión recomendada),
+  "disclaimer": string (1 frase breve en ${langName} recordando que son estimaciones basadas en una muestra de las fuentes consultadas y que un vacío no es definitivo sin una búsqueda adicional)
+}`,
+  });
 
   let narrative: DiagnosisNarrative;
   try {
     narrative = await generateJSON<DiagnosisNarrative>(narrativePrompt, SENIOR_RESEARCHER_SYSTEM_INSTRUCTION);
   } catch (err) {
     console.error("[diagnosis] Qwen narrativa falló, uso fallback:", (err as Error).message);
-    narrative = {
-      label: level === "bajo" ? "Poco explorado" : level === "moderado" ? "Moderadamente explorado" : "Muy explorado",
-      explanation: `Se encontraron ${relatedStudiesCount} estudios relacionados con una similitud promedio ${simLabel.toLowerCase()} y una tendencia ${trend}.`,
-      disclaimer: "Estimaciones basadas en las fuentes consultadas.",
-    };
+    if (lang === "en") {
+      narrative = {
+        label: level === "bajo" ? "Rarely explored" : level === "moderado" ? "Moderately explored" : "Heavily explored",
+        explanation: `Found ${relatedStudiesCount} related studies with an average similarity rating of ${simLabel.toLowerCase()} and a ${trend} trend.`,
+        disclaimer: "Estimates based on retrieved academic sources.",
+      };
+    } else if (lang === "pt") {
+      narrative = {
+        label: level === "bajo" ? "Pouco explorado" : level === "moderado" ? "Moderadamente explorado" : "Muito explorado",
+        explanation: `Foram encontrados ${relatedStudiesCount} estudos relacionados com uma similaridade média ${simLabel.toLowerCase()} e uma tendência ${trend}.`,
+        disclaimer: "Estimativas baseadas nas fontes consultadas.",
+      };
+    } else {
+      narrative = {
+        label: level === "bajo" ? "Poco explorado" : level === "moderado" ? "Moderadamente explorado" : "Muy explorado",
+        explanation: `Se encontraron ${relatedStudiesCount} estudios relacionados con una similitud promedio ${simLabel.toLowerCase()} y una tendencia ${trend}.`,
+        disclaimer: "Estimaciones basadas en las fuentes consultadas.",
+      };
+    }
   }
 
   const scoreOutOf10 = level === "bajo" ? 8 : level === "moderado" ? 6 : 3;
@@ -107,6 +134,7 @@ Responde SOLO con este JSON:
   const diagnosis: ResearchDiagnosis = {
     id: params.id,
     originalIdea: params.input.rawText,
+    academicLevel: params.input.academicLevel ?? "pregrado",
     refinedQuestionPreview: params.refinedQuestionPreview,
     exploration: {
       level,

@@ -9,6 +9,7 @@ import type {
   SessionHistoryEntry,
   DailyUsagePoint,
   ResearchSession,
+  GeoWork,
 } from "@/types/research";
 import type { Article } from "@/types/article";
 import type { Opportunity, DelimitationOption, Topic } from "@/types/topic";
@@ -78,6 +79,13 @@ export async function getHistory(): Promise<{ analyses: SessionHistoryEntry[]; a
   return apiFetch("/research/history");
 }
 
+export async function searchArticles(params: { query: string; category?: string; year?: string }): Promise<Article[]> {
+  const query = new URLSearchParams({ query: params.query });
+  if (params.category) query.set("category", params.category);
+  if (params.year) query.set("year", params.year);
+  return apiFetch<Article[]>(`/research/article-search?${query.toString()}`);
+}
+
 /** Trae una búsqueda pasada completa (diagnóstico, literatura, temas, tendencias, oportunidades), tal como se guardó, sin mezclarla con la más reciente. */
 export async function getSessionById(id: string): Promise<ResearchSession> {
   return apiFetch<ResearchSession>(`/research/sessions/${id}`);
@@ -86,4 +94,18 @@ export async function getSessionById(id: string): Promise<ResearchSession> {
 /** Videos relacionados vía YouTube Data API v3 (requiere que esa API esté habilitada en Google Cloud para la key configurada). */
 export async function getYoutubeVideos(query: string): Promise<YoutubeVideo[]> {
   return apiFetch<YoutubeVideo[]>(`/research/youtube?q=${encodeURIComponent(query)}`);
+}
+
+/** Estudios (título + enlace) de un país o de un conjunto de instituciones para unos términos de búsqueda; alimenta la lista del mapa. */
+export async function getGeoWorks(params: {
+  query: string;
+  country?: string;
+  institutions?: string[];
+  limit?: number;
+}): Promise<{ total: number; works: GeoWork[] }> {
+  const search = new URLSearchParams({ q: params.query });
+  if (params.country) search.set("country", params.country);
+  if (params.institutions?.length) search.set("institutions", params.institutions.slice(0, 50).join(","));
+  if (params.limit) search.set("limit", String(params.limit));
+  return apiFetch<{ total: number; works: GeoWork[] }>(`/research/geo-works?${search.toString()}`);
 }

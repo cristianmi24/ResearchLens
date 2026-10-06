@@ -3,6 +3,7 @@ import type { Article } from "@/types/article";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { SimilarityBadge } from "./SimilarityBadge";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ArticleCardProps {
   article: Article;
@@ -10,6 +11,8 @@ interface ArticleCardProps {
 }
 
 export function ArticleCard({ article, onOpen }: ArticleCardProps) {
+  const { t } = useLanguage();
+
   return (
     <Card className="p-5 hover:shadow-[var(--shadow-card-hover)] transition-shadow">
       <div className="flex items-start justify-between gap-4">
@@ -24,13 +27,15 @@ export function ArticleCard({ article, onOpen }: ArticleCardProps) {
       </div>
 
       <div className="mt-4 rounded-lg bg-surface-muted px-3 py-2.5">
-        <p className="text-xs font-medium text-ink-secondary mb-0.5">¿Por qué se parece?</p>
+        <p className="text-xs font-medium text-ink-secondary mb-0.5">
+          {t("article.whySimilar", "¿Por qué se parece?")}
+        </p>
         <p className="text-sm text-ink-primary">{article.similarityReason}</p>
       </div>
 
       <div className="mt-4 flex justify-end">
         <Button variant="outline" size="sm" onClick={() => onOpen(article)}>
-          Ver investigación
+          {t("article.viewResearch", "Ver investigación")}
           <ChevronRight size={16} />
         </Button>
       </div>

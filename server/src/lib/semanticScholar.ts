@@ -91,3 +91,4 @@ export async function searchPapers(searchQuery: string, limit = 15, attempts = 3
 
   return { articles: [], waitedMs, gaveUp: true };
 }
+

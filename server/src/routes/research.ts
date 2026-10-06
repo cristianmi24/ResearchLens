@@ -12,6 +12,9 @@ import {
 } from "../db/researchSessions.js";
 import { interestOverTime } from "../lib/googleTrends.js";
 import { searchVideos } from "../lib/youtube.js";
+import { searchPapers as searchSemanticPapers } from "../lib/semanticScholar.js";
+import { searchWorks as searchOpenAlexWorks, searchWorksByGeo } from "../lib/openalex.js";
+import { searchWorks as searchCrossrefWorks } from "../lib/crossref.js";
 import type { RefineFormInput, ResearchIdeaInput, UsageStatus } from "../types.js";
 
 export const researchRouter = Router();
@@ -83,6 +86,28 @@ researchRouter.get("/history", async (req, res) => {
   }
 });
 
+researchRouter.get("/article-search", async (req, res) => {
+  try {
+    const searchQuery = String(req.query.query ?? "").trim();
+    const category = String(req.query.category ?? "").trim();
+    const year = Number(req.query.year ?? 0);
+    if (!searchQuery) return res.status(400).json({ error: "query es requerido" });
+    const query = [searchQuery, category].filter(Boolean).join(" ");
+    const [semanticResult, openAlexResult, crossrefPapers] = await Promise.all([
+      searchSemanticPapers(query, 10),
+      searchOpenAlexWorks(query, 10),
+      searchCrossrefWorks(query, 10),
+    ]);
+    const allPapers = [...semanticResult.articles, ...openAlexResult.articles, ...crossrefPapers].filter(
+      (paper) => !year || paper.year === year
+    );
+    res.json(allPapers);
+  } catch (err) {
+    console.error("[GET /research/article-search]", err);
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
 researchRouter.post("/search", async (req, res) => {
   try {
     const { diagnosisId } = req.body as { diagnosisId?: string };
@@ -141,6 +166,35 @@ researchRouter.post("/refine", async (req, res) => {
     res.json(proposals);
   } catch (err) {
     console.error("[POST /research/refine]", err);
+    res.status(502).json({ error: (err as Error).message });
+  }
+});
+
+/**
+ * Estudios (título + enlace) de un país o de un conjunto de instituciones para la
+ * búsqueda de una sesión: alimenta la lista del mapa al seleccionar un país o departamento.
+ * Parámetros: q (términos de búsqueda), country (ISO alfa-2) o institutions (ids "I123" separados por coma), limit (1-10).
+ */
+researchRouter.get("/geo-works", async (req, res) => {
+  const q = String(req.query.q ?? "").trim().slice(0, 300);
+  const country = String(req.query.country ?? "").trim().toUpperCase();
+  const institutionIds = String(req.query.institutions ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  const limit = Math.min(10, Math.max(1, Number(req.query.limit) || 8));
+
+  const validCountry = /^[A-Z]{2}$/.test(country);
+  const validInstitutions = institutionIds.length > 0 && institutionIds.length <= 50 && institutionIds.every((id) => /^I\d{3,}$/.test(id));
+  if (!q || (!validCountry && !validInstitutions)) {
+    return res.status(400).json({ error: "Se requiere q y un country válido (ISO alfa-2) o institutions (ids de OpenAlex)" });
+  }
+
+  try {
+    const result = await searchWorksByGeo(q, { country: validCountry ? country : undefined, institutionIds: validInstitutions ? institutionIds : undefined }, limit);
+    res.json(result);
+  } catch (err) {
+    console.error("[GET /research/geo-works]", err);
     res.status(502).json({ error: (err as Error).message });
   }
 });

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { ChevronRight, GraduationCap, Send, Sparkles, X } from "lucide-react";
+import { ChevronRight, Send, X } from "lucide-react";
 import type { AssistantMessage } from "@/types/assistant";
-import { askAssistant } from "@/services/llmApi";
+import { askAssistant, saveAssistantMessages } from "@/services/llmApi";
 import { assistantSuggestedQuestions, mockAssistantWelcome } from "@/data/mockAssistant";
 import { helpKnowledgeBase } from "@/data/helpKnowledgeBase";
 import { findBestHelpAnswer, MIN_HELP_RELEVANCE } from "@/utils/helpMatcher";
@@ -10,6 +10,8 @@ import { OPEN_ASSISTANT_EVENT, type OpenAssistantDetail } from "@/utils/assistan
 import { AssistantMessageBody } from "@/components/assistant/AssistantMessageBody";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/utils/cn";
+
+import { useLanguage } from "@/i18n/LanguageContext";
 
 let messageId = 1;
 function nextId() {
@@ -35,14 +37,21 @@ export function AIResearchAssistant() {
   const [messages, setMessages] = useState<AssistantMessage[]>([mockAssistantWelcome]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const { t } = useLanguage();
 
   async function sendQuestion(question: string) {
     const trimmed = question.trim();
     if (!trimmed || isThinking) return;
 
+    const userMessage: AssistantMessage = {
+      id: nextId(),
+      role: "user",
+      text: trimmed,
+      createdAt: new Date().toISOString(),
+    };
     setMessages((prev) => [
       ...prev,
-      { id: nextId(), role: "user", text: trimmed, createdAt: new Date().toISOString() },
+      userMessage,
     ]);
     setInput("");
 
@@ -51,16 +60,17 @@ export function AIResearchAssistant() {
     // ya recuperados para esta búsqueda.
     const localMatch = findBestHelpAnswer(trimmed, helpKnowledgeBase);
     if (localMatch && localMatch.score >= MIN_HELP_RELEVANCE) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: nextId(),
-          role: "assistant",
-          text: localMatch.entry.answer,
-          createdAt: new Date().toISOString(),
-          source: "local",
-        },
-      ]);
+      const localMessage: AssistantMessage = {
+        id: nextId(),
+        role: "assistant",
+        text: localMatch.entry.answer,
+        createdAt: new Date().toISOString(),
+        source: "local",
+      };
+      setMessages((prev) => [...prev, localMessage]);
+      void saveAssistantMessages([userMessage, localMessage]).catch((err) =>
+        console.error("[assistant] no se pudo persistir la conversación local:", err),
+      );
       return;
     }
 
@@ -96,12 +106,12 @@ export function AIResearchAssistant() {
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-brand-600 text-white px-4 py-3 text-sm font-medium shadow-lg hover:bg-brand-700 transition-colors focus-ring",
+          "fixed bottom-5 right-5 z-40 inline-flex items-center gap-2.5 rounded-full bg-brand-600 text-white pl-2.5 pr-4 py-2 text-sm font-medium shadow-lg hover:bg-brand-700 transition-colors focus-ring",
           open && "hidden"
         )}
       >
-        <Sparkles size={18} />
-        Preguntar al asistente
+        <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain rounded-full bg-white/20 p-0.5" />
+        {t("assistant.button", "Preguntar al asistente")}
       </button>
 
       {open && (
@@ -122,14 +132,14 @@ export function AIResearchAssistant() {
               />
               <div className="flex items-center justify-between px-5 h-16">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
-                    <GraduationCap size={18} />
-                  </div>
+                  <img src="/logo.png" alt="Asistente" className="h-9 w-9 shrink-0 object-contain rounded-full bg-brand-50 p-0.5 shadow-sm" />
                   <div className="min-w-0">
                     <p className="font-serif font-semibold text-ink-primary leading-tight truncate">
-                      Asistente de investigación
+                      {t("assistant.title", "Asistente de investigación")}
                     </p>
-                    <p className="text-xs text-ink-muted leading-tight">Cómo funciona ResearchLens y tu búsqueda</p>
+                    <p className="text-xs text-ink-muted leading-tight">
+                      {t("assistant.subtitle", "Cómo funciona ResearchLens y tu búsqueda")}
+                    </p>
                   </div>
                 </div>
                 <button

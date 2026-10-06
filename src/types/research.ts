@@ -13,14 +13,18 @@ export type ResearchArea =
   | "administracion"
   | "otro";
 
+export type AcademicLevel = "pregrado" | "maestria" | "doctorado";
+
 export interface ResearchIdeaInput {
   rawText: string;
   /** Qué quiere lograr el usuario con la investigación: se pide de forma concreta y es obligatorio. */
   objective: string;
+  academicLevel: AcademicLevel;
   area?: ResearchArea;
   population?: string;
   context?: string;
   intervention?: string;
+  language?: "es" | "en" | "pt";
 }
 
 export type ExplorationLevel = "alto" | "moderado" | "bajo";
@@ -61,9 +65,59 @@ export interface PublicInterestAnalysis {
   method: string;
 }
 
+export interface GeoCountryCount {
+  /** ISO alfa-2. */
+  code: string;
+  /** Estudios de la búsqueda con al menos una institución del país (conteo exacto en OpenAlex). */
+  count: number;
+}
+
+export interface GeoInstitution {
+  /** Id corto de OpenAlex (ej. "I324290372"). */
+  id: string;
+  name: string;
+  /** Estudios de la muestra nacional en los que participa. */
+  count: number;
+  city: string | null;
+  region: string | null;
+  lat: number;
+  lon: number;
+}
+
+/**
+ * Dónde se investiga el tema, según la ubicación de las instituciones de los
+ * autores en OpenAlex. Ver server/src/pipeline/geoResearch.ts.
+ */
+export interface GeoWork {
+  id: string;
+  title: string;
+  year: number | null;
+  /** DOI si existe; si no, la página de la fuente o la ficha de OpenAlex. */
+  url: string;
+}
+
+export interface GeoResearchDistribution {
+  query: string;
+  /** Estudios en OpenAlex que coinciden con la búsqueda. */
+  total: number;
+  countries: GeoCountryCount[];
+  colombia: {
+    /** Estudios de la búsqueda con al menos una institución colombiana. */
+    total: number;
+    /** Cuántos de ellos se analizaron (los más relevantes). */
+    sampleSize: number;
+    institutions: GeoInstitution[];
+    /** Instituciones colombianas sin coordenadas en OpenAlex (no se pueden ubicar). */
+    unlocated: number;
+    /** Por cada estudio analizado, ids de sus instituciones colombianas ubicadas. */
+    works: string[][];
+  } | null;
+}
+
 export interface ResearchDiagnosis {
   id: string;
   originalIdea: string;
+  academicLevel: AcademicLevel;
   refinedQuestionPreview: string;
   exploration: ExplorationEstimate;
   indicators: ResearchIndicators;
@@ -71,6 +125,8 @@ export interface ResearchDiagnosis {
   disclaimer: string;
   analyzedAt: string;
   publicInterest?: PublicInterestAnalysis | null;
+  /** `null` si OpenAlex no devolvió distribución geográfica; ausente en sesiones guardadas antes de esta función. */
+  geoDistribution?: GeoResearchDistribution | null;
 }
 
 export interface AnalysisStep {
@@ -134,7 +190,8 @@ export interface RefineFormInput {
   intervention: string;
   outcomeVariable: string;
   geography: string;
-  studyType: "experimental" | "correlacional" | "cualitativo" | "revision_sistematica" | "mixto";
+  studyType: "experimental" | "correlacional" | "cualitativo" | "revision_sistematica" | "mixto" | "no_definido";
+  language?: "es" | "en" | "pt";
 }
 
 export interface QualityRating {

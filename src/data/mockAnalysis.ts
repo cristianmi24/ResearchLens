@@ -2,6 +2,7 @@ import type { AnalysisStep, ResearchDiagnosis, ResearchQuestionProposal, SourceC
 
 export const mockDiagnosis: ResearchDiagnosis = {
   id: "diag-001",
+  academicLevel: "pregrado",
   originalIdea:
     "Quiero investigar cómo la inteligencia artificial puede ayudar a los estudiantes a aprender programación.",
   refinedQuestionPreview:

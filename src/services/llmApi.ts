@@ -12,3 +12,10 @@ export async function askAssistant(question: string): Promise<Omit<AssistantMess
     body: JSON.stringify({ question }),
   });
 }
+
+export async function saveAssistantMessages(messages: AssistantMessage[]): Promise<void> {
+  await apiFetch<void>("/assistant/messages", {
+    method: "POST",
+    body: JSON.stringify({ messages }),
+  });
+}

@@ -23,6 +23,8 @@ export interface Article {
   doi: string;
   abstract: string;
   mainConcepts: string[];
+  /** Países (ISO alfa-2) de las instituciones de los autores. Solo lo informa OpenAlex. */
+  countries?: string[];
   similarityPercent: number;
   similarityReason: string;
   comparison: ComparisonField[];

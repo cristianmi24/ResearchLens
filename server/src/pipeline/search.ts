@@ -3,7 +3,7 @@ import * as semanticScholar from "../lib/semanticScholar.js";
 import * as crossref from "../lib/crossref.js";
 import * as arxiv from "../lib/arxiv.js";
 import { generateJSON } from "../lib/qwen.js";
-import { SENIOR_RESEARCHER_SYSTEM_INSTRUCTION } from "./generative.js";
+import { SENIOR_RESEARCHER_SYSTEM_INSTRUCTION, languageName, levelGuidance, rocas } from "./prompts.js";
 import type { Article, ResearchArea, ResearchIdeaInput, SourceConsultation } from "../types.js";
 
 const AREAS: ResearchArea[] = [
@@ -26,24 +26,33 @@ export interface IdeaProfile {
 
 /** Usa Qwen para convertir la idea en libre texto en términos de búsqueda bibliográfica. */
 export async function extractIdeaProfile(input: ResearchIdeaInput): Promise<IdeaProfile> {
-  const prompt = `A partir de la siguiente idea de investigación, extrae información útil para buscarla en bases
-de datos científicas (OpenAlex, Semantic Scholar, Crossref, arXiv), eligiendo los términos que mejor orienten la
-búsqueda hacia literatura realmente pertinente.
+  const lang = input.language ?? "es";
+  const langName = languageName(lang);
 
-Idea original: "${input.rawText}"
+  const prompt = rocas({
+    role: `Eres el estratega de búsqueda bibliográfica del proyecto: conviertes una idea escrita en lenguaje natural en términos de búsqueda que recuperen literatura científica realmente pertinente en OpenAlex, Semantic Scholar, Crossref y arXiv.`,
+    objective: `Producir (1) términos de búsqueda efectivos, (2) el área disciplinar, (3) conceptos relacionados que orienten la exploración y (4) una vista previa de pregunta de investigación defendible y proporcional al nivel académico. De la calidad de estos términos depende toda la evidencia posterior.`,
+    context: `Idea original: "${input.rawText}"
+Nivel académico: ${input.academicLevel ?? "pregrado"}. ${levelGuidance(input.academicLevel)}
 Área declarada por el usuario: ${input.area ?? "no especificada"}
 Población: ${input.population ?? "no especificada"}
 Contexto: ${input.context ?? "no especificado"}
 Intervención/variable: ${input.intervention ?? "no especificada"}
 Objetivo: ${input.objective ?? "no especificado"}
-
-Responde SOLO con un JSON con esta forma exacta:
+Idioma de salida de los textos visibles: ${langName}.`,
+    actions: `1. Delimita: identifica fenómeno central, población, contexto y variables o constructos presentes en la idea. Lo que no esté definido no se inventa.
+2. keywords (3 a 6, cortos, en inglés): los dos primeros nombran el fenómeno o constructo central con su término estándar en la literatura (no la jerga del usuario); los siguientes añaden población, intervención o método SOLO si son esenciales. Evita términos tan amplios que traigan ruido y tan estrechos que vacíen la búsqueda (países o instituciones concretas, salvo que sean el eje del estudio). Todos se unen en una sola consulta: cada término debe sumar pertinencia.
+3. relatedConcepts (4 a 8, en ${langName}): conceptos, constructos, enfoques o teorías cercanos; incluye al menos un marco teórico plausible si la idea lo admite.
+4. refinedQuestionPreview: derívala únicamente de lo que dice la idea; una sola oración interrogativa, proporcional al nivel académico y sin añadir poblaciones o contextos que el usuario no mencionó.
+5. area: elige la que mejor corresponda; si el usuario declaró una coherente, respétala.`,
+    output: `Responde SOLO con un JSON con esta forma exacta:
 {
   "keywords": string[] (3 a 6 términos de búsqueda cortos en inglés, los más efectivos para recuperar literatura relevante),
   "area": uno de ${JSON.stringify(AREAS)},
-  "relatedConcepts": string[] (4 a 8 conceptos relacionados, en español, cortos, para mostrar como etiquetas),
-  "refinedQuestionPreview": string (una posible pregunta de investigación en español, una sola oración, terminada en "?")
-}`;
+  "relatedConcepts": string[] (4 a 8 conceptos relacionados, escritos en ${langName}, cortos, para mostrar como etiquetas),
+  "refinedQuestionPreview": string (una posible pregunta de investigación redactada en ${langName}, una sola oración, terminada en "?")
+}`,
+  });
 
   const result = await generateJSON<IdeaProfile>(prompt, SENIOR_RESEARCHER_SYSTEM_INSTRUCTION);
   const area = AREAS.includes(result.area) ? result.area : (input.area ?? "otro");

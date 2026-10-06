@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { openAssistantWithQuestion } from "@/utils/assistantBus";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 
 const DEMO_QUESTION = "Muéstrame una demo de cómo funciona todo";
 
@@ -22,6 +24,7 @@ const fadeUp: Variants = {
 
 export function Settings() {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -37,8 +40,8 @@ export function Settings() {
       variants={{ show: { transition: { staggerChildren: 0.06 } } }}
     >
       <motion.div variants={fadeUp}>
-        <h1 className="text-2xl font-semibold text-ink-primary">Configuración</h1>
-        <p className="text-ink-secondary mt-2">Preferencias generales de ResearchLens.</p>
+        <h1 className="text-2xl font-semibold text-ink-primary">{t("settings.title", "Configuración")}</h1>
+        <p className="text-ink-secondary mt-2">{t("settings.subtitle", "Preferencias generales de ResearchLens.")}</p>
       </motion.div>
 
       <motion.div variants={fadeUp}>
@@ -71,16 +74,16 @@ export function Settings() {
             <div className="flex flex-wrap gap-3 mt-4">
               <Button variant="secondary" onClick={handleLogout}>
                 <LogOut size={16} />
-                Cerrar sesión
+                {t("nav.logout", "Cerrar sesión")}
               </Button>
               <Button variant="outline" onClick={() => openAssistantWithQuestion(DEMO_QUESTION)}>
                 <PlayCircle size={16} />
-                Ver cómo funciona
+                {t("home.howItWorksBtn", "Ver cómo funciona")}
               </Button>
               <Link to="/privacidad">
                 <Button variant="outline">
                   <ShieldCheck size={16} />
-                  Políticas y privacidad
+                  {t("settings.privacyBtn", "Políticas y privacidad")}
                 </Button>
               </Link>
             </div>
@@ -98,38 +101,31 @@ export function Settings() {
               <Database size={18} />
             </div>
             <div className="min-w-0">
-              <CardTitle>Fuentes de datos</CardTitle>
-              <CardDescription>
-                Las conexiones a OpenAlex, Crossref, Semantic Scholar, arXiv, Qwen y Google Trends se gestionan desde
-                el backend. El frontend nunca almacena claves de API, solo tu sesión (JWT). Gracias especiales a{" "}
-                <a
-                  href="https://www.semanticscholar.org/product/api"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-brand-600 hover:underline"
-                >
-                  Semantic Scholar
-                </a>{" "}
-                por darnos acceso a su API para este proyecto.
-              </CardDescription>
-            </div>
+                <CardTitle>{t("settings.sourcesTitle", "Fuentes de datos conectadas")}</CardTitle>
+                <CardDescription>
+                  {t("settings.sourcesDesc", "Las conexiones a OpenAlex, Crossref, Semantic Scholar, arXiv, YouTube y Google Trends se gestionan en tiempo real.")}
+                </CardDescription>
+              </div>
           </CardHeader>
         </Card>
       </motion.div>
 
       <motion.div variants={fadeUp}>
         <Card>
-          <CardHeader className="flex flex-row items-center gap-3">
-            <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-              style={{ backgroundColor: "color-mix(in srgb, var(--color-cat-3) 14%, white)", color: "var(--color-cat-3)" }}
-            >
-              <Globe size={18} />
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                style={{ backgroundColor: "color-mix(in srgb, var(--color-cat-3) 14%, white)", color: "var(--color-cat-3)" }}
+              >
+                <Globe size={18} />
+              </div>
+              <div className="min-w-0">
+                <CardTitle>{t("settings.languageTitle", "Idioma del sistema")}</CardTitle>
+                <CardDescription>{t("settings.languageDesc", "Selecciona el idioma de la interfaz (Español, English, Português).")}</CardDescription>
+              </div>
             </div>
-            <div className="min-w-0">
-              <CardTitle>Idioma</CardTitle>
-              <CardDescription>ResearchLens está disponible en español.</CardDescription>
-            </div>
+            <LanguageSelector variant="tabs" />
           </CardHeader>
         </Card>
       </motion.div>
@@ -144,9 +140,9 @@ export function Settings() {
               <User size={18} />
             </div>
             <div className="min-w-0">
-              <CardTitle>Cuenta creada</CardTitle>
-              <CardDescription>Tu sesión está protegida con autenticación JWT y contraseña cifrada.</CardDescription>
-            </div>
+                <CardTitle>{t("settings.accountTitle", "Cuenta creada")}</CardTitle>
+                <CardDescription>{t("settings.accountDesc", "Tu sesión está protegida con autenticación JWT y contraseña cifrada.")}</CardDescription>
+              </div>
           </CardHeader>
         </Card>
       </motion.div>

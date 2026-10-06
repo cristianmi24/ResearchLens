@@ -2,37 +2,40 @@ import { BookMarked, GitCompareArrows, TrendingUp, Sparkles } from "lucide-react
 import type { ResearchIndicators } from "@/types/research";
 import { formatNumber } from "@/utils/formatting";
 import { Card } from "@/components/ui/Card";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ResearchScoreProps {
   indicators: ResearchIndicators;
 }
 
-const trendLabel: Record<ResearchIndicators["trend"], string> = {
-  creciente: "📈 En crecimiento",
-  estable: "➡️ Estable",
-  decreciente: "📉 En disminución",
-};
-
 export function ResearchScore({ indicators }: ResearchScoreProps) {
+  const { t } = useLanguage();
+
+  const trendLabels: Record<ResearchIndicators["trend"], string> = {
+    creciente: t("score.trendGrowing", "📈 En crecimiento"),
+    estable: t("score.trendStable", "➡️ Estable"),
+    decreciente: t("score.trendDeclining", "📉 En disminución"),
+  };
+
   const items = [
     {
       icon: BookMarked,
-      label: "Literatura relacionada",
-      value: `${formatNumber(indicators.relatedStudiesCount)} estudios`,
+      label: t("score.relatedLiterature", "Literatura relacionada"),
+      value: `${formatNumber(indicators.relatedStudiesCount)} ${t("score.studies", "estudios")}`,
     },
     {
       icon: GitCompareArrows,
-      label: "Similitud promedio",
+      label: t("score.averageSimilarity", "Similitud promedio"),
       value: indicators.averageSimilarityLabel,
     },
     {
       icon: TrendingUp,
-      label: "Tendencia",
-      value: trendLabel[indicators.trend],
+      label: t("score.trend", "Tendencia"),
+      value: trendLabels[indicators.trend],
     },
     {
       icon: Sparkles,
-      label: "Posible diferenciación",
+      label: t("score.differentiation", "Posible diferenciación"),
       value: indicators.differentiationLabel,
     },
   ];

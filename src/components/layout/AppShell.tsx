@@ -9,7 +9,7 @@ export function AppShell() {
       <Sidebar />
       <MobileNav />
       <div className="lg:pl-64">
-        <main className="mx-auto max-w-6xl px-4 py-8 lg:px-10 lg:py-10">
+        <main className="w-full px-4 py-8 lg:px-10 lg:py-10">
           <Outlet />
         </main>
       </div>

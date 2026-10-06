@@ -2,18 +2,20 @@ import { useEffect, useState } from "react";
 import { PlayCircle, SquarePlay } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { getYoutubeVideos } from "@/services/researchApi";
+import { useLanguage } from "@/i18n/LanguageContext";
 import type { YoutubeVideo } from "@/types/youtube";
 
 interface RelatedVideosProps {
   query: string;
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("es", { year: "numeric", month: "short" });
-}
-
 export function RelatedVideos({ query }: RelatedVideosProps) {
+  const { language, t } = useLanguage();
   const [videos, setVideos] = useState<YoutubeVideo[] | null>(null);
+
+  function formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString(language, { year: "numeric", month: "short" });
+  }
 
   useEffect(() => {
     if (!query.trim()) return;
@@ -35,9 +37,9 @@ export function RelatedVideos({ query }: RelatedVideosProps) {
       <div>
         <h2 className="text-lg font-semibold text-ink-primary mb-1 flex items-center gap-2">
           <SquarePlay size={20} className="text-red-600" />
-          Videos relacionados
+          {t("videos.title", "Videos relacionados")}
         </h2>
-        <p className="text-sm text-ink-muted">Buscando videos…</p>
+        <p className="text-sm text-ink-muted">{t("videos.loading", "Buscando videos…")}</p>
       </div>
     );
   }
@@ -50,9 +52,11 @@ export function RelatedVideos({ query }: RelatedVideosProps) {
     <div>
       <h2 className="text-lg font-semibold text-ink-primary mb-1 flex items-center gap-2">
         <SquarePlay size={20} className="text-red-600" />
-        Videos relacionados
+        {t("videos.title", "Videos relacionados")}
       </h2>
-      <p className="text-sm text-ink-secondary mb-4">Contenido de YouTube sobre este tema, para complementar tu lectura.</p>
+      <p className="text-sm text-ink-secondary mb-4">
+        {t("videos.subtitle", "Contenido de YouTube sobre este tema, para complementar tu lectura.")}
+      </p>
       <div className="grid gap-4 sm:grid-cols-2">
         {videos.slice(0, 4).map((video) => (
           <a

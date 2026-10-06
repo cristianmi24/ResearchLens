@@ -4,10 +4,12 @@ import { Lightbulb } from "lucide-react";
 import { ResearchIdeaInput } from "@/components/research/ResearchIdeaInput";
 import { useResearch } from "@/hooks/useResearch";
 import type { ResearchIdeaInput as ResearchIdeaInputType } from "@/types/research";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export function Idea() {
   const navigate = useNavigate();
   const { submitIdea } = useResearch();
+  const { t } = useLanguage();
 
   function handleSubmit(input: ResearchIdeaInputType) {
     submitIdea(input);
@@ -28,9 +30,9 @@ export function Idea() {
           <Lightbulb size={20} />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-ink-primary">Cuéntanos tu idea</h1>
+          <h1 className="text-2xl font-semibold text-ink-primary">{t("idea.title", "Cuéntanos tu idea")}</h1>
           <p className="text-ink-secondary mt-1 leading-relaxed">
-            No necesitas saber cómo formular una pregunta científica. Escríbela con tus propias palabras.
+            {t("idea.subtitle", "No necesitas saber cómo formular una pregunta científica. Escríbela con tus propias palabras.")}
           </p>
         </div>
       </motion.div>

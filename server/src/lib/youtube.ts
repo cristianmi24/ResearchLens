@@ -43,6 +43,24 @@ function relevanceScore(queryTokens: string[], video: { title: string; channelTi
 
 const MIN_RELEVANCE = 0.2;
 
+interface YoutubeSearchResponse {
+  items: {
+    id: { videoId?: string };
+    snippet: { title: string; channelTitle: string; publishedAt: string; thumbnails: { medium?: { url?: string } } };
+  }[];
+}
+
+function isYoutubeSearchResponse(value: unknown): value is YoutubeSearchResponse {
+  if (!value || typeof value !== "object" || !Array.isArray((value as { items?: unknown }).items)) return false;
+  return (value as YoutubeSearchResponse).items.every(
+    (item) =>
+      Boolean(item && item.id && item.snippet) &&
+      typeof item.snippet.title === "string" &&
+      typeof item.snippet.channelTitle === "string" &&
+      typeof item.snippet.publishedAt === "string",
+  );
+}
+
 export async function searchVideos(searchQuery: string, maxResults = 8): Promise<YoutubeVideo[]> {
   if (!config.youtube.apiKey) return [];
 
@@ -57,9 +75,7 @@ export async function searchVideos(searchQuery: string, maxResults = 8): Promise
     key: config.youtube.apiKey,
   });
 
-  let data: {
-    items: { id: { videoId: string }; snippet: { title: string; channelTitle: string; publishedAt: string; thumbnails: { medium?: { url: string } } } }[];
-  };
+  let data: YoutubeSearchResponse;
   try {
     const res = await fetch(`https://www.googleapis.com/youtube/v3/search?${params.toString()}`, {
       signal: AbortSignal.timeout(10_000),
@@ -68,22 +84,30 @@ export async function searchVideos(searchQuery: string, maxResults = 8): Promise
       console.error("[youtube] search failed", res.status, await res.text());
       return [];
     }
-    data = await res.json();
+    const payload: unknown = await res.json();
+    if (!isYoutubeSearchResponse(payload)) {
+      console.warn("[youtube] la respuesta de la API no tiene el formato esperado");
+      return [];
+    }
+    data = payload;
   } catch (err) {
     console.warn("[youtube] no se pudo contactar la API:", (err as Error).message);
     return [];
   }
 
   const videos = data.items
-    .filter((item) => item.id.videoId)
-    .map((item) => ({
-      videoId: item.id.videoId,
-      title: item.snippet.title,
-      channelTitle: item.snippet.channelTitle,
-      publishedAt: item.snippet.publishedAt,
-      thumbnailUrl: item.snippet.thumbnails.medium?.url ?? "",
-      url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-    }));
+    .flatMap((item) => {
+      const videoId = item.id.videoId;
+      if (!videoId) return [];
+      return [{
+        videoId,
+        title: item.snippet.title,
+        channelTitle: item.snippet.channelTitle,
+        publishedAt: item.snippet.publishedAt,
+        thumbnailUrl: item.snippet.thumbnails.medium?.url ?? "",
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+      }];
+    });
 
   const queryTokens = tokenize(searchQuery);
   return videos

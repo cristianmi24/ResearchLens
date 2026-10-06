@@ -1,6 +1,7 @@
 import type { Opportunity } from "@/types/topic";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const badgeTone: Record<Opportunity["badge"], "good" | "warning"> = {
   poco_explorado: "good",
@@ -19,11 +20,21 @@ interface OpportunityCardProps {
 }
 
 export function OpportunityCard({ opportunity }: OpportunityCardProps) {
+  const { t } = useLanguage();
+
+  const badgeLabels: Record<Opportunity["badge"], string> = {
+    poco_explorado: t("opportunities.badge.rarelyExplored", "Poco explorado"),
+    parcialmente_explorado: t("opportunities.badge.partiallyExplored", "Parcialmente explorado"),
+    diferenciacion_potencial: t("opportunities.badge.potentialDiff", "Diferenciación potencial"),
+  };
+
+  const label = badgeLabels[opportunity.badge] || opportunity.badgeLabel;
+
   return (
     <Card className="p-5">
       <Badge tone={badgeTone[opportunity.badge]}>
         <span aria-hidden>{badgeEmoji[opportunity.badge]}</span>
-        {opportunity.badgeLabel.toUpperCase()}
+        {label.toUpperCase()}
       </Badge>
       <h3 className="text-base font-semibold text-ink-primary mt-3">{opportunity.title}</h3>
       <p className="text-sm text-ink-secondary mt-1.5 leading-relaxed">{opportunity.description}</p>

@@ -7,8 +7,7 @@ posibles oportunidades de investigación — todo en una sola búsqueda, sin ten
 distintas.
 
 Es un proyecto académico desarrollado por **Cristian Miguel Peñata Andrades**, estudiante de Tecnología
-e Informática de la **Universidad de Córdoba** (Colombia), vinculado al grupo de investigación
-**EDUTLAN**.
+e Informática de la **Universidad de Córdoba** (Colombia).
 
 > Si nunca has usado un proyecto como este, no te preocupes: este documento explica todo paso a paso,
 > desde qué es cada cosa hasta cómo instalarlo y usarlo, sin dar nada por sabido.
@@ -47,6 +46,11 @@ e Informática de la **Universidad de Córdoba** (Colombia), vinculado al grupo 
   en qué se diferencia (población, contexto, variable).
 - **Ver un mapa visual de los temas relacionados** con tu idea: cada círculo es un tema, su tamaño
   indica cuántos estudios existen y su color indica qué tan concentrada está la investigación en él.
+- **Ver en un mapa geográfico dónde se investiga tu tema**: un globo 3D coloreado por cuántos estudios
+  tienen instituciones en cada país (conteo exacto de OpenAlex) y una vista de Colombia por
+  departamentos, con las instituciones ubicadas en sus coordenadas reales. Sirve para detectar
+  posibles vacíos de contexto (por ejemplo, un tema casi sin estudios con instituciones colombianas).
+  El script `scripts/verify-map-data.ts` comprueba que todo quede en su sitio.
 - **Comparar el interés público (Google Trends) contra las publicaciones académicas** del mismo tema,
   con un cálculo estadístico real (regresión lineal y correlación), no solo una opinión generada por IA.
 - **Descubrir posibles oportunidades de investigación**: vacíos poco explorados, zonas parcialmente
@@ -375,8 +379,7 @@ todos los días a medianoche (UTC) y puedes ver cuántos te quedan en la secció
 
 - Gracias especiales a **[Semantic Scholar](https://www.semanticscholar.org/product/api)** por el
   acceso a su API para este proyecto.
-- Proyecto desarrollado en el marco del grupo de investigación **EDUTLAN**, Universidad de Córdoba
-  (Colombia).
+- Proyecto desarrollado en la Universidad de Córdoba (Colombia).
 
 ---
 
@@ -387,3 +390,15 @@ libremente, incluso con fines comerciales, siempre y cuando mantengas el aviso d
 Ver el archivo [LICENSE](LICENSE) para el texto completo.
 
 Copyright (c) 2026 **Cristian Miguel Peñata Andrades**
+
+## Despliegue en Vercel (frontend + backend)
+
+El repositorio incluye un `vercel.json` con dos *services* en un solo proyecto de Vercel:
+
+- `web`: el frontend (Vite, raíz del repo), público en `/`.
+- `api`: el backend Express (`server/`), público en `/api/*`.
+
+Como ambos comparten dominio, el frontend usa `VITE_API_BASE_URL=/api` (valor por defecto) y no hace falta
+ningún *binding*. Importa el repositorio en Vercel y define en *Settings → Environment Variables* las mismas
+variables del `.env` (`QWEN_API_KEY`, `DATABASE_URL`, `JWT_SECRET`, `CLERK_SECRET_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`, etc.).
+Nunca subas el `.env` al repositorio. Para probar todo en local con Vercel: `vercel dev`.

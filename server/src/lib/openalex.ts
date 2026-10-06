@@ -26,7 +26,7 @@ interface OpenAlexWork {
   title: string | null;
   display_name: string | null;
   publication_year: number | null;
-  authorships: { author: { display_name: string } }[];
+  authorships: { author: { display_name: string }; countries?: string[] }[];
   abstract_inverted_index: Record<string, number[]> | null;
   topics: { id: string; display_name: string; score: number }[];
 }
@@ -47,6 +47,9 @@ function normalize(work: OpenAlexWork): Article {
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
       .map((t) => t.display_name),
+    // Países (ISO alfa-2) de las instituciones de los autores; alimenta el mapa
+    // geográfico. Solo OpenAlex lo entrega: las demás fuentes no traen país.
+    countries: [...new Set(work.authorships.flatMap((a) => a.countries ?? []))],
     similarityPercent: 0,
     similarityReason: "",
     comparison: [],
@@ -128,4 +131,179 @@ export async function worksByYearForTopic(topicId: string): Promise<{ year: numb
   if (!res.ok) return [];
   const data = (await res.json()) as { group_by: { key: string; count: number }[] };
   return parseYearBuckets(data.group_by);
+}
+
+/* ------------------------------------------------------------------ */
+/* Geografía de la investigación (alimenta el mapa)                    */
+/* ------------------------------------------------------------------ */
+
+const INSTITUTIONS_URL = "https://api.openalex.org/institutions";
+const GEO_BATCH = 50;
+
+/** "https://openalex.org/countries/US" → "US"; descarta claves que no son un ISO alfa-2. */
+function countryCodeFromKey(key: string): string | null {
+  const code = key.split("/").pop() ?? "";
+  return /^[A-Z]{2}$/.test(code) ? code : null;
+}
+
+/**
+ * Conteo EXACTO de estudios por país sobre todos los resultados de la búsqueda
+ * (no solo la muestra recuperada): un estudio cuenta en un país si al menos una
+ * institución de sus autores está en él.
+ */
+export async function worksByCountry(
+  searchQuery: string,
+): Promise<{ total: number; countries: { code: string; count: number }[] }> {
+  const params = commonParams();
+  params.set("search", searchQuery);
+  params.set("group_by", "authorships.countries");
+  const res = await fetch(`${BASE_URL}?${params.toString()}`);
+  if (!res.ok) return { total: 0, countries: [] };
+  const data = (await res.json()) as { meta: { count: number }; group_by: { key: string; count: number }[] };
+  const countries = data.group_by
+    .map((g) => ({ code: countryCodeFromKey(g.key), count: g.count }))
+    .filter((g): g is { code: string; count: number } => g.code !== null)
+    .sort((a, b) => b.count - a.count);
+  return { total: data.meta.count, countries };
+}
+
+export interface CountryInstitutionWorks {
+  /** Estudios de la búsqueda con al menos una institución del país. */
+  total: number;
+  /** Por cada trabajo analizado, los ids (cortos) de sus instituciones del país, sin repetir. */
+  works: string[][];
+  /** id corto → nombre de cada institución del país que aparece en la muestra. */
+  institutions: Map<string, string>;
+}
+
+/**
+ * Los `perPage` estudios más relevantes de la búsqueda con alguna institución de
+ * `countryCode`, y qué instituciones de ese país participan en cada uno.
+ */
+export async function institutionWorksForCountry(
+  searchQuery: string,
+  countryCode: string,
+  perPage = 200,
+): Promise<CountryInstitutionWorks> {
+  const params = commonParams();
+  params.set("search", searchQuery);
+  params.set("filter", `authorships.institutions.country_code:${countryCode}`);
+  params.set("per_page", String(perPage));
+  params.set("select", "id,authorships");
+  const res = await fetch(`${BASE_URL}?${params.toString()}`);
+  if (!res.ok) return { total: 0, works: [], institutions: new Map() };
+  const data = (await res.json()) as {
+    meta: { count: number };
+    results: {
+      authorships: { institutions?: { id: string; display_name: string; country_code: string | null }[] }[];
+    }[];
+  };
+
+  const institutions = new Map<string, string>();
+  const works = data.results.map((work) => {
+    const ids = new Set<string>();
+    for (const authorship of work.authorships ?? []) {
+      for (const inst of authorship.institutions ?? []) {
+        if (inst.country_code !== countryCode) continue;
+        const shortId = inst.id.split("/").pop() ?? inst.id;
+        ids.add(shortId);
+        institutions.set(shortId, inst.display_name);
+      }
+    }
+    return [...ids];
+  });
+
+  return { total: data.meta.count, works, institutions };
+}
+
+export interface GeoWork {
+  id: string;
+  title: string;
+  year: number | null;
+  /** DOI si existe; si no, la página de la fuente; si tampoco, la ficha de OpenAlex. */
+  url: string;
+}
+
+/**
+ * Los estudios más relevantes de la búsqueda cuyos autores tienen institución en
+ * un país (`country`, ISO alfa-2) o en alguna de las instituciones dadas (ids
+ * cortos de OpenAlex). Alimenta la lista de títulos con enlace del mapa.
+ */
+export async function searchWorksByGeo(
+  searchQuery: string,
+  geo: { country?: string; institutionIds?: string[] },
+  limit = 8,
+): Promise<{ total: number; works: GeoWork[] }> {
+  const filters: string[] = [];
+  if (geo.country) filters.push(`authorships.countries:${geo.country}`);
+  if (geo.institutionIds?.length) filters.push(`authorships.institutions.id:${geo.institutionIds.join("|")}`);
+  if (filters.length === 0) return { total: 0, works: [] };
+
+  const params = commonParams();
+  params.set("search", searchQuery);
+  params.set("filter", filters.join(","));
+  params.set("per_page", String(limit));
+  params.set("select", "id,display_name,publication_year,doi,primary_location");
+  const res = await fetch(`${BASE_URL}?${params.toString()}`);
+  if (!res.ok) throw new Error(`OpenAlex respondió ${res.status}`);
+  const data = (await res.json()) as {
+    meta: { count: number };
+    results: {
+      id: string;
+      display_name: string | null;
+      publication_year: number | null;
+      doi: string | null;
+      primary_location?: { landing_page_url?: string | null } | null;
+    }[];
+  };
+
+  return {
+    total: data.meta.count,
+    works: data.results
+      .filter((w) => w.display_name)
+      .map((w) => ({
+        id: w.id.split("/").pop() ?? w.id,
+        title: w.display_name as string,
+        year: w.publication_year,
+        url: w.doi ?? w.primary_location?.landing_page_url ?? w.id,
+      })),
+  };
+}
+
+export interface InstitutionGeo {
+  city: string | null;
+  region: string | null;
+  lat: number;
+  lon: number;
+}
+
+/** Coordenadas y ciudad de instituciones (por lotes de 50 ids cortos, ej. "I324290372"). */
+export async function institutionGeo(shortIds: string[]): Promise<Map<string, InstitutionGeo>> {
+  const out = new Map<string, InstitutionGeo>();
+  for (let i = 0; i < shortIds.length; i += GEO_BATCH) {
+    const batch = shortIds.slice(i, i + GEO_BATCH);
+    const params = commonParams();
+    params.set("filter", `openalex:${batch.join("|")}`);
+    params.set("select", "id,geo");
+    params.set("per_page", String(GEO_BATCH));
+    const res = await fetch(`${INSTITUTIONS_URL}?${params.toString()}`);
+    if (!res.ok) continue;
+    const data = (await res.json()) as {
+      results: {
+        id: string;
+        geo?: { city: string | null; region: string | null; latitude: number | null; longitude: number | null };
+      }[];
+    };
+    for (const inst of data.results) {
+      const geo = inst.geo;
+      if (!geo || geo.latitude == null || geo.longitude == null) continue;
+      out.set(inst.id.split("/").pop() ?? inst.id, {
+        city: geo.city,
+        region: geo.region,
+        lat: geo.latitude,
+        lon: geo.longitude,
+      });
+    }
+  }
+  return out;
 }

@@ -61,7 +61,7 @@ export function ResearchProvider({ children }: { children: ReactNode }) {
 
   const runAnalysis = useCallback(async () => {
     setState((prev) => ({ ...prev, isAnalyzing: true }));
-    const idea = state.ideaInput ?? { rawText: "", objective: "" };
+    const idea = state.ideaInput ?? { rawText: "", objective: "", academicLevel: "pregrado" as const };
 
     try {
       // El backend construye artículos/temas/oportunidades como parte del
@@ -111,7 +111,11 @@ export function ResearchProvider({ children }: { children: ReactNode }) {
       // Reemplaza TODO el estado por el de esta sesión puntual: nunca se
       // combinan artículos/temas/oportunidades de dos búsquedas distintas.
       setState({
-        ideaInput: { rawText: session.originalIdea, objective: "" },
+        ideaInput: {
+          rawText: session.originalIdea,
+          objective: "",
+          academicLevel: session.diagnosis.academicLevel ?? "pregrado",
+        },
         sessionId: session.id,
         diagnosis: session.diagnosis,
         articles: session.articles,

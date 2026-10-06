@@ -92,10 +92,19 @@
   font-weight: 600;
 }
 .trama-landing .brand-mark {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   position: relative;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.trama-landing .brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
 }
 .trama-landing .brand-mark svg {
   width: 100%;
@@ -115,7 +124,9 @@
 .trama-landing .nav-links {
   display: flex;
   align-items: center;
-  gap: 2.6rem;
+  gap: 1.8rem;
+  position: relative;
+  z-index: 200;
 }
 .trama-landing .nav-links a {
   font-size: 0.92rem;
@@ -326,9 +337,10 @@
   margin-bottom: 4px;
 }
 .trama-landing .tag-grid {
-  display: grid;
-  grid-template-columns: repeat(2, auto);
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  justify-content: flex-end;
 }
 .trama-landing .tag {
   font-family: "IBM Plex Mono", monospace;
@@ -595,25 +607,298 @@
 .trama-landing .node-chip.youtube .dot {
   background: #e2636e;
 }
+.trama-landing .node-chip.crossref .dot {
+  background: #6b7ae8;
+}
 
-/* ---------- FOOTER ---------- */
-.trama-landing footer {
-  padding: 3.4rem 5vw 2.6rem;
+/* ---------- LANGUAGE SELECTOR (NAV) ---------- */
+.trama-landing .nav-lang-selector {
+  position: relative;
+}
+.trama-landing .nav-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--paper);
+  background: rgba(44, 38, 32, 0.06);
+  border: 1px solid var(--line-faint);
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  letter-spacing: 0.04em;
+}
+.trama-landing .nav-lang-btn:hover {
+  background: rgba(44, 38, 32, 0.1);
+  border-color: var(--brass);
+}
+.trama-landing .lang-chevron {
+  font-size: 0.65rem;
+  display: inline-block;
+  transition: transform 0.2s ease;
+  line-height: 1;
+}
+.trama-landing .lang-chevron.open {
+  transform: rotate(180deg);
+}
+.trama-landing .nav-lang-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 140px;
+  background: var(--ink);
+  border: 1px solid var(--line-faint);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px -8px rgba(44, 38, 32, 0.2);
+  overflow: hidden;
+  z-index: 300;
+}
+.trama-landing .lang-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.88rem;
+  color: var(--paper);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+.trama-landing .lang-option:hover {
+  background: rgba(44, 38, 32, 0.06);
+}
+.trama-landing .lang-option.active {
+  background: color-mix(in srgb, var(--brass) 12%, transparent);
+  font-weight: 600;
+}
+.trama-landing .lang-check {
+  margin-left: auto;
+  color: var(--brass);
+  font-size: 0.75rem;
+}
+/* En mobile, el selector de idioma va dentro del menú lateral */
+@media (max-width: 860px) {
+  .trama-landing .nav-lang-dropdown {
+    position: static;
+    box-shadow: none;
+    border: 1px solid var(--line-faint);
+    border-radius: 6px;
+    margin-top: 6px;
+    min-width: unset;
+    width: 100%;
+  }
+  .trama-landing .nav-lang-selector {
+    width: 100%;
+  }
+  .trama-landing .nav-lang-btn {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 6px;
+  }
+}
+
+/* ---------- FOOTER (MINIMALISTA & ESTÉTICO) ---------- */
+.trama-landing .footer-minimal {
+  padding: 3rem 5vw 2rem;
   border-top: 1px solid var(--line-faint);
+  /* Fondo sólido para cubrir la imagen de fondo de la landing */
+  background: var(--ink);
+  background-image: none;
+  position: relative;
+  isolation: isolate;
+}
+.trama-landing .footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.trama-landing .footer-main {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 3rem;
 }
-.trama-landing footer .brand {
-  font-size: 1rem;
+.trama-landing .footer-brand-section {
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
-.trama-landing footer p {
+.trama-landing .footer-brand {
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--paper);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+.trama-landing .footer-brand:hover {
+  opacity: 0.85;
+}
+.trama-landing .footer-tagline {
   color: var(--paper-dim);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  margin: 0.65rem 0 0;
+}
+.trama-landing .footer-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 1.1rem;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  color: #2e7d32;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+.trama-landing .status-indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+  animation: footer-status-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes footer-status-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+.trama-landing .footer-links-grid {
+  display: flex;
+  gap: 4rem;
+  flex-wrap: wrap;
+}
+.trama-landing .footer-link-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.trama-landing .footer-link-group a,
+.trama-landing .footer-enter-link {
+  font-size: 0.88rem;
+  color: var(--paper-dim);
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  font-family: "Space Grotesk", sans-serif;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.trama-landing .footer-link-group a:hover,
+.trama-landing .footer-enter-link:hover {
+  color: var(--brass);
+  transform: translateX(2px);
+}
+.trama-landing .footer-enter-link {
+  font-weight: 500;
+  color: var(--paper);
+}
+
+.trama-landing .footer-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--line-faint);
+  margin: 2rem 0 1.4rem;
+}
+
+.trama-landing .footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+.trama-landing .footer-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.trama-landing .footer-rights {
+  color: var(--paper);
   font-size: 0.82rem;
+  font-weight: 500;
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+}
+.trama-landing .footer-credits {
+  color: var(--paper-dim);
+  font-size: 0.76rem;
   font-family: "IBM Plex Mono", monospace;
   margin: 0;
+  line-height: 1.5;
+}
+
+.trama-landing .back-to-top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  color: var(--paper-dim);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--line-faint);
+  background: rgba(44, 38, 32, 0.02);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.trama-landing .back-to-top-btn:hover {
+  color: var(--brass);
+  border-color: var(--brass);
+  background: rgba(184, 134, 11, 0.04);
+  transform: translateY(-2px);
+}
+.trama-landing .back-to-top-btn .back-arrow {
+  transition: transform 0.2s ease;
+}
+.trama-landing .back-to-top-btn:hover .back-arrow {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .trama-landing .footer-minimal {
+    padding: 3.5rem 6vw 2rem;
+  }
+  .trama-landing .footer-main {
+    flex-direction: column;
+    gap: 2.2rem;
+  }
+  .trama-landing .footer-links-grid {
+    gap: 2.5rem;
+    width: 100%;
+  }
+  .trama-landing .footer-bottom {
+    flex-direction: column-reverse;
+    gap: 1.2rem;
+    align-items: flex-start;
+  }
 }
 
 /* ---------- MODAL (login/registro real) ---------- */

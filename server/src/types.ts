@@ -25,6 +25,8 @@ export interface Article {
   doi: string;
   abstract: string;
   mainConcepts: string[];
+  /** Países (ISO alfa-2) de las instituciones de los autores. Solo lo informa OpenAlex. */
+  countries?: string[];
   similarityPercent: number;
   similarityReason: string;
   comparison: ComparisonField[];
@@ -40,13 +42,17 @@ export type ResearchArea =
   | "administracion"
   | "otro";
 
+export type AcademicLevel = "pregrado" | "maestria" | "doctorado";
+
 export interface ResearchIdeaInput {
   rawText: string;
+  academicLevel?: AcademicLevel;
   area?: ResearchArea;
   population?: string;
   context?: string;
   intervention?: string;
   objective?: string;
+  language?: "es" | "en" | "pt";
 }
 
 export type ExplorationLevel = "alto" | "moderado" | "bajo";
@@ -88,9 +94,53 @@ export interface PublicInterestAnalysis {
   method: string;
 }
 
+export interface GeoCountryCount {
+  /** ISO alfa-2. */
+  code: string;
+  /** Estudios de la búsqueda con al menos una institución del país (conteo exacto en OpenAlex). */
+  count: number;
+}
+
+export interface GeoInstitution {
+  /** Id corto de OpenAlex (ej. "I324290372"). */
+  id: string;
+  name: string;
+  /** Estudios de la muestra nacional en los que participa. */
+  count: number;
+  city: string | null;
+  region: string | null;
+  lat: number;
+  lon: number;
+}
+
+/**
+ * Dónde se investiga el tema, según la ubicación de las instituciones de los
+ * autores en OpenAlex. `countries` es un conteo exacto sobre todos los estudios
+ * de la búsqueda; `colombia` detalla la vista nacional a partir de los estudios
+ * más relevantes con institución colombiana. Ver `pipeline/geoResearch.ts`.
+ */
+export interface GeoResearchDistribution {
+  query: string;
+  /** Estudios en OpenAlex que coinciden con la búsqueda. */
+  total: number;
+  countries: GeoCountryCount[];
+  colombia: {
+    /** Estudios de la búsqueda con al menos una institución colombiana. */
+    total: number;
+    /** Cuántos de ellos se analizaron (los más relevantes). */
+    sampleSize: number;
+    institutions: GeoInstitution[];
+    /** Instituciones colombianas sin coordenadas en OpenAlex (no se pueden ubicar). */
+    unlocated: number;
+    /** Por cada estudio analizado, ids de sus instituciones colombianas ubicadas. */
+    works: string[][];
+  } | null;
+}
+
 export interface ResearchDiagnosis {
   id: string;
   originalIdea: string;
+  academicLevel: AcademicLevel;
   refinedQuestionPreview: string;
   exploration: ExplorationEstimate;
   indicators: ResearchIndicators;
@@ -99,6 +149,8 @@ export interface ResearchDiagnosis {
   analyzedAt: string;
   /** `null` si Google Trends no dio suficientes datos para este término; opcional por compatibilidad con sesiones guardadas antes de este campo. */
   publicInterest?: PublicInterestAnalysis | null;
+  /** `null` si OpenAlex no devolvió distribución geográfica; opcional por compatibilidad con sesiones anteriores. */
+  geoDistribution?: GeoResearchDistribution | null;
 }
 
 export interface SourceConsultation {
@@ -116,7 +168,8 @@ export interface RefineFormInput {
   intervention: string;
   outcomeVariable: string;
   geography: string;
-  studyType: "experimental" | "correlacional" | "cualitativo" | "revision_sistematica" | "mixto";
+  studyType: "experimental" | "correlacional" | "cualitativo" | "revision_sistematica" | "mixto" | "no_definido";
+  language?: "es" | "en" | "pt";
 }
 
 export interface QualityRating {

@@ -2,11 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { FileText, GraduationCap, Library, Menu, SquarePlay, X } from "lucide-react";
+import { BookOpen, FileText, Globe, GraduationCap, Library, Menu, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/api";
 import { isClerkEnabled } from "@/lib/clerkConfig";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { LANGUAGE_OPTIONS } from "@/i18n/types";
 import "./Welcome.css";
 
 type AuthMode = "register" | "login";
@@ -25,9 +27,9 @@ const teamMembers: TeamMember[] = [
     tab: "AUTOR",
     name: "Cristian Miguel Peñata Andrades",
     role: "Estudiante de Tecnología e Informática",
-    bio: "Vinculado a la Universidad de Córdoba (Colombia) y al grupo de investigación EDUTLAN, donde participa en proyectos de tecnología educativa, sistemas tutores inteligentes y herramientas de apoyo a la investigación académica.",
+    bio: "Vinculado a la Universidad de Córdoba (Colombia), donde participa en proyectos de tecnología educativa, sistemas tutores inteligentes y herramientas de apoyo a la investigación académica.",
     stampLeft: "UNIV. DE CÓRDOBA",
-    stampRight: "GRUPO EDUTLAN",
+    stampRight: "INVESTIGACIÓN ACADÉMICA",
   },
   {
     tab: "AUTORA",
@@ -35,7 +37,7 @@ const teamMembers: TeamMember[] = [
     role: "Estudiante de Tecnología e Informática",
     bio: "Vinculada a la Universidad de Córdoba (Colombia), coautora de este proyecto dentro de la asignatura de Ciencia de Datos.",
     stampLeft: "UNIV. DE CÓRDOBA",
-    stampRight: "GRUPO EDUTLAN",
+    stampRight: "CIENCIA DE DATOS",
   },
   {
     tab: "DOCENTE",
@@ -59,7 +61,7 @@ const connectedSources = [
   { label: "Semantic Scholar", color: "#2FA89A", icon: GraduationCap },
   { label: "OpenAlex", color: "#D1993F", icon: Library },
   { label: "arXiv", color: "#E0636E", icon: FileText },
-  { label: "YouTube", color: "#D6484A", icon: SquarePlay },
+  { label: "Crossref", color: "#6B7AE8", icon: BookOpen },
 ];
 
 /** Réplica del network-SVG decorativo original: nodos de fuentes conectados a un
@@ -73,7 +75,7 @@ function buildHeroSvg(): string {
     { x: 1080, y: 160, r: 5, color: "#D1993F", label: "OpenAlex" },
     { x: 1230, y: 340, r: 5, color: "#E0636E", label: "arXiv" },
     { x: 1190, y: 560, r: 5, color: "#2FA89A", label: "Semantic Scholar" },
-    { x: 1020, y: 700, r: 5, color: "#E2636E", label: "YouTube" },
+    { x: 1020, y: 700, r: 5, color: "#6B7AE8", label: "Crossref" },
   ];
   const center = { x: 780, y: 420 };
   const satellites = Array.from({ length: 26 }, () => ({
@@ -123,11 +125,14 @@ function buildHeroSvg(): string {
 export function Welcome() {
   const navigate = useNavigate();
   const { login, register } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [firstName, setFirstName] = useState("");
@@ -171,6 +176,17 @@ export function Welcome() {
     return () => io.disconnect();
   }, []);
 
+  // Close lang dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setIsLangOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   function openModal() {
     setError(null);
     setIsModalOpen(true);
@@ -181,7 +197,7 @@ export function Welcome() {
     setError(null);
 
     if (mode === "register" && !acceptedTerms) {
-      setError("Debes aceptar los términos y condiciones para crear una cuenta.");
+      setError(t("auth.modal.termsError"));
       return;
     }
 
@@ -194,7 +210,7 @@ export function Welcome() {
       }
       navigate("/inicio");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "No se pudo completar la solicitud. Intenta de nuevo.");
+      setError(err instanceof ApiError ? err.message : t("auth.modal.genericError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -238,12 +254,7 @@ export function Welcome() {
           </button>
           <a href="#inicio" className="brand">
             <span className="brand-mark">
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="5" cy="12" r="2.2" fill="#D1993F" />
-                <circle cx="19" cy="5" r="2.2" fill="#2FA89A" />
-                <circle cx="19" cy="19" r="2.2" fill="#E0636E" />
-                <path d="M7 12L17 5.5M7 12L17 18.5" stroke="#2C2620" strokeOpacity="0.35" strokeWidth="1" />
-              </svg>
+              <img src="/logo.png" alt="ResearchLens logo" />
             </span>
             ResearchLens
           </a>
@@ -253,14 +264,57 @@ export function Welcome() {
         )}
         <div className={`nav-links ${isMenuOpen ? "open" : ""}`}>
           <a href="#inicio" onClick={() => setIsMenuOpen(false)}>
-            Inicio
+            {t("welcome.nav.home")}
           </a>
           <a href="#quienes-somos" onClick={() => setIsMenuOpen(false)}>
-            Quiénes somos
+            {t("welcome.nav.about")}
           </a>
           <a href="#como-usarla" onClick={() => setIsMenuOpen(false)}>
-            Cómo usarla
+            {t("welcome.nav.how")}
           </a>
+
+          {/* Selector de idioma en la nav */}
+          <div className="nav-lang-selector" ref={langRef}>
+            <button
+              type="button"
+              className="nav-lang-btn"
+              onClick={() => setIsLangOpen((v) => !v)}
+              aria-label="Cambiar idioma"
+            >
+              <Globe size={14} />
+              <span>{LANGUAGE_OPTIONS.find((o) => o.code === language)?.shortLabel ?? "ES"}</span>
+              <span className={`lang-chevron ${isLangOpen ? "open" : ""}`}>▾</span>
+            </button>
+            <AnimatePresence>
+              {isLangOpen && (
+                <motion.div
+                  className="nav-lang-dropdown"
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {LANGUAGE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.code}
+                      type="button"
+                      className={`lang-option ${language === opt.code ? "active" : ""}`}
+                      onClick={() => {
+                        setLanguage(opt.code);
+                        setIsLangOpen(false);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <span>{opt.flag}</span>
+                      <span>{opt.label}</span>
+                      {language === opt.code && <span className="lang-check">✓</span>}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <motion.button
             type="button"
             className="enter-btn"
@@ -271,7 +325,7 @@ export function Welcome() {
               openModal();
             }}
           >
-            Entrar
+            {t("welcome.nav.enter")}
           </motion.button>
         </div>
       </nav>
@@ -280,18 +334,15 @@ export function Welcome() {
         <div className="hero-canvas" dangerouslySetInnerHTML={{ __html: heroSvg }} />
         <div className="hero-veil" />
         <div className="hero-content">
-          <span className="eyebrow">Semantic Scholar · OpenAlex · arXiv · YouTube</span>
+          <span className="eyebrow">{t("welcome.eyebrow")}</span>
           <h1>
-            Una búsqueda.
+            {t("welcome.hero.title1")}
             <br />
-            Cuatro fuentes.
+            {t("welcome.hero.title2")}
             <br />
-            <em>Un solo mapa</em> del conocimiento.
+            <em>{t("welcome.hero.title3")}</em>
           </h1>
-          <p className="lead">
-            ResearchLens cruza artículos científicos, preprints y video académico en tiempo real, y te devuelve las
-            conexiones — no una lista más de resultados sueltos.
-          </p>
+          <p className="lead">{t("welcome.hero.lead")}</p>
           <div className="hero-actions">
             <motion.button
               type="button"
@@ -300,15 +351,15 @@ export function Welcome() {
               whileTap={{ scale: 0.97 }}
               onClick={openModal}
             >
-              Entrar a ResearchLens →
+              {t("welcome.hero.cta")}
             </motion.button>
             <a href="#como-usarla" className="btn-ghost">
-              Ver cómo funciona
+              {t("welcome.hero.learnMore")}
             </a>
           </div>
         </div>
         <div className="source-tags">
-          <span className="label">Fuentes conectadas</span>
+          <span className="label">{t("welcome.hero.connectedSources")}</span>
           <div className="tag-grid">
             {connectedSources.map((source) => (
               <span
@@ -330,12 +381,9 @@ export function Welcome() {
 
       <section id="quienes-somos">
         <div className="section-inner">
-          <span className="section-tag">Ficha 01 — Autoría</span>
-          <h2 className="section-title reveal">Quiénes somos</h2>
-          <p className="section-sub reveal">
-            Un proyecto nacido en el aula, para resolver un problema del aula: encontrar en minutos lo que antes
-            tomaba pestañas y pestañas de navegación.
-          </p>
+          <span className="section-tag">{t("welcome.about.tag")}</span>
+          <h2 className="section-title reveal">{t("welcome.about.title")}</h2>
+          <p className="section-sub reveal">{t("welcome.about.subtitle")}</p>
 
           <div className="card-index">
             <div>
@@ -382,16 +430,9 @@ export function Welcome() {
             </div>
 
             <div className="mission-block reveal">
-              <p>
-                <strong>ResearchLens existe porque buscar bibliografía sigue siendo lento.</strong> Cada fuente académica
-                habla su propio idioma: Semantic Scholar entiende de citaciones, OpenAlex de metadatos abiertos,
-                arXiv de preprints recientes y YouTube de explicaciones en video.
-              </p>
-              <p>
-                En lugar de abrir cuatro pestañas, ResearchLens hace la pregunta una sola vez y arma el cruce entre ellas:
-                qué se ha publicado, quién lo cita, y quién ya lo explicó en video.
-              </p>
-              <p>Es una herramienta pensada para estudiantes, docentes y grupos de investigación que necesitan avanzar rápido sin perder rigor.</p>
+              <p>{t("welcome.about.mission1")}</p>
+              <p>{t("welcome.about.mission2")}</p>
+              <p>{t("welcome.about.mission3")}</p>
             </div>
           </div>
         </div>
@@ -399,24 +440,21 @@ export function Welcome() {
 
       <section id="como-usarla">
         <div className="section-inner">
-          <span className="section-tag">Ficha 02 — Uso</span>
-          <h2 className="section-title reveal">Cómo usarla</h2>
-          <p className="section-sub reveal">
-            Tres pasos, un solo cuadro de búsqueda. Así se traza la ruta desde tu pregunta hasta el material
-            verificado.
-          </p>
+          <span className="section-tag">{t("welcome.how.tag")}</span>
+          <h2 className="section-title reveal">{t("welcome.how.title")}</h2>
+          <p className="section-sub reveal">{t("welcome.how.subtitle")}</p>
 
           <div className="steps">
             <div className="step reveal">
               <span className="step-num mono">01</span>
               <div>
-                <h3>Escribe tu tema</h3>
-                <p>Una palabra clave, una pregunta de investigación o el título de un paper. ResearchLens no necesita sintaxis especial.</p>
+                <h3>{t("welcome.how.step1.title")}</h3>
+                <p>{t("welcome.how.step1.desc")}</p>
               </div>
               <div className="step-visual">
                 <div className="node-chip">
                   <span className="dot" />
-                  búsqueda
+                  {t("welcome.how.step1.visual")}
                 </div>
               </div>
             </div>
@@ -424,11 +462,8 @@ export function Welcome() {
             <div className="step reveal">
               <span className="step-num mono">02</span>
               <div>
-                <h3>ResearchLens consulta las cuatro fuentes a la vez</h3>
-                <p>
-                  En paralelo, se interroga a Semantic Scholar y OpenAlex por artículos y metadatos, a arXiv por
-                  preprints recientes, y a YouTube por explicaciones en video del mismo tema.
-                </p>
+                <h3>{t("welcome.how.step2.title")}</h3>
+                <p>{t("welcome.how.step2.desc")}</p>
               </div>
               <div className="step-visual">
                 <span className="node-chip">
@@ -443,9 +478,9 @@ export function Welcome() {
                   <span className="dot" />
                   arXiv
                 </span>
-                <span className="node-chip youtube">
+                <span className="node-chip crossref">
                   <span className="dot" />
-                  YouTube
+                  Crossref
                 </span>
               </div>
             </div>
@@ -453,16 +488,13 @@ export function Welcome() {
             <div className="step reveal">
               <span className="step-num mono">03</span>
               <div>
-                <h3>Recibe el cruce, no una lista suelta</h3>
-                <p>
-                  Papers agrupados por relevancia y citación, junto con los videos que mejor los explican — listos
-                  para leer, citar o compartir con tu grupo de investigación.
-                </p>
+                <h3>{t("welcome.how.step3.title")}</h3>
+                <p>{t("welcome.how.step3.desc")}</p>
               </div>
               <div className="step-visual">
                 <div className="node-chip">
                   <span className="dot" />
-                  resultados cruzados
+                  {t("welcome.how.step3.visual")}
                 </div>
               </div>
             </div>
@@ -470,14 +502,60 @@ export function Welcome() {
         </div>
       </section>
 
-      <footer>
-        <a href="#inicio" className="brand">
-          ResearchLens
-        </a>
-        <p>
-          EDUTLAN · Universidad de Córdoba — Gracias a Semantic Scholar por el acceso a su API ·{" "}
-          <Link to="/privacidad">Políticas y privacidad</Link>
-        </p>
+      <footer className="footer-minimal">
+        <div className="footer-container">
+          <div className="footer-main">
+            <div className="footer-brand-section">
+              <a href="#inicio" className="brand footer-brand">
+                <span className="brand-mark">
+                  <img src="/logo.png" alt="ResearchLens logo" />
+                </span>
+                ResearchLens
+              </a>
+              <p className="footer-tagline">{t("welcome.footer.tagline")}</p>
+              <div className="footer-status-pill">
+                <span className="status-indicator-dot" />
+                <span>{t("welcome.footer.status")}</span>
+              </div>
+            </div>
+
+            <div className="footer-links-grid">
+              <div className="footer-link-group">
+                <a href="#inicio">{t("welcome.nav.home")}</a>
+                <a href="#quienes-somos">{t("welcome.nav.about")}</a>
+                <a href="#como-usar">{t("welcome.nav.how")}</a>
+              </div>
+              <div className="footer-link-group">
+                <Link to="/privacidad">{t("welcome.footer.privacy")}</Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("login");
+                    setIsModalOpen(true);
+                  }}
+                  className="footer-enter-link"
+                >
+                  {t("welcome.nav.enter")} →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="footer-divider" />
+
+          <div className="footer-bottom">
+            <div className="footer-legal">
+              <p className="footer-rights">
+                © {new Date().getFullYear()} ResearchLens. {t("welcome.footer.rights")}
+              </p>
+              <p className="footer-credits">{t("welcome.footer.credits")}</p>
+            </div>
+            <a href="#inicio" className="back-to-top-btn" aria-label={t("welcome.footer.backToTop")}>
+              <span>{t("welcome.footer.backToTop")}</span>
+              <span className="back-arrow">↑</span>
+            </a>
+          </div>
+        </div>
       </footer>
 
       <AnimatePresence>
@@ -498,10 +576,13 @@ export function Welcome() {
               transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
             >
               <button type="button" className="modal-close" onClick={() => setIsModalOpen(false)}>
-                cerrar ✕
+                {t("auth.modal.close")}
               </button>
-              <span className="section-tag">Acceso</span>
-              <h3>{mode === "register" ? "Crea tu cuenta" : "Inicia sesión"}</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                <img src="/logo.png" alt="ResearchLens" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
+                <span className="section-tag" style={{ margin: 0 }}>{t("auth.modal.tag")}</span>
+              </div>
+              <h3>{mode === "register" ? t("auth.modal.registerTitle") : t("auth.modal.loginTitle")}</h3>
 
               <div className="auth-tabs">
                 <button
@@ -512,7 +593,7 @@ export function Welcome() {
                     setError(null);
                   }}
                 >
-                  Iniciar sesión
+                  {t("auth.modal.loginTab")}
                 </button>
                 <button
                   type="button"
@@ -522,7 +603,7 @@ export function Welcome() {
                     setError(null);
                   }}
                 >
-                  Crear cuenta
+                  {t("auth.modal.registerTab")}
                 </button>
               </div>
 
@@ -538,22 +619,22 @@ export function Welcome() {
                       style={{ overflow: "hidden" }}
                     >
                       <div className="field">
-                        <label htmlFor="firstName">Nombre</label>
+                        <label htmlFor="firstName">{t("auth.modal.firstName")}</label>
                         <input
                           id="firstName"
                           value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
-                          placeholder="Tu nombre"
+                          placeholder={t("auth.modal.firstNamePlaceholder")}
                           required
                         />
                       </div>
                       <div className="field">
-                        <label htmlFor="lastName">Apellido</label>
+                        <label htmlFor="lastName">{t("auth.modal.lastName")}</label>
                         <input
                           id="lastName"
                           value={lastName}
                           onChange={(e) => setLastName(e.target.value)}
-                          placeholder="Tu apellido"
+                          placeholder={t("auth.modal.lastNamePlaceholder")}
                           required
                         />
                       </div>
@@ -563,13 +644,13 @@ export function Welcome() {
 
                 <div className="field-row">
                   <div className="field">
-                    <label htmlFor="email">Correo</label>
+                    <label htmlFor="email">{t("auth.modal.email")}</label>
                     <input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="nombre@universidad.edu"
+                      placeholder={t("auth.modal.emailPlaceholder")}
                       required
                     />
                   </div>
@@ -577,7 +658,7 @@ export function Welcome() {
 
                 <div className="field-row">
                   <div className="field">
-                    <label htmlFor="password">Contraseña</label>
+                    <label htmlFor="password">{t("auth.modal.password")}</label>
                     <input
                       id="password"
                       type="password"
@@ -587,7 +668,7 @@ export function Welcome() {
                       required
                       minLength={8}
                     />
-                    {mode === "register" && <p className="field-hint">Mínimo 8 caracteres.</p>}
+                    {mode === "register" && <p className="field-hint">{t("auth.modal.passwordHint")}</p>}
                   </div>
                 </div>
 
@@ -608,9 +689,9 @@ export function Welcome() {
                         required
                       />
                       <span>
-                        Acepto los{" "}
+                        {t("auth.modal.terms")}{" "}
                         <Link to="/privacidad" target="_blank" rel="noreferrer">
-                          términos y condiciones y la política de privacidad
+                          {t("auth.modal.termsLink")}
                         </Link>
                         .
                       </span>
@@ -635,7 +716,11 @@ export function Welcome() {
                   whileHover={isSubmitting ? undefined : { y: -2 }}
                   whileTap={isSubmitting ? undefined : { scale: 0.98 }}
                 >
-                  {isSubmitting ? "Procesando..." : mode === "register" ? "Crear cuenta y continuar" : "Iniciar sesión"}
+                  {isSubmitting
+                    ? t("auth.modal.submitting")
+                    : mode === "register"
+                    ? t("auth.modal.submitRegister")
+                    : t("auth.modal.submitLogin")}
                 </motion.button>
               </form>
 

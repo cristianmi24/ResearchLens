@@ -65,7 +65,10 @@ export function ProjectDetail() {
           <CardTitle>Diagnóstico</CardTitle>
         </CardHeader>
         <CardContent>
-          <ExplorationLevel exploration={project.diagnosis.exploration} />
+          <ExplorationLevel
+            exploration={project.diagnosis.exploration}
+            studiesCount={project.diagnosis.indicators.relatedStudiesCount}
+          />
           <p className="text-sm text-ink-secondary mt-4 leading-relaxed">{project.diagnosis.exploration.explanation}</p>
         </CardContent>
       </Card>

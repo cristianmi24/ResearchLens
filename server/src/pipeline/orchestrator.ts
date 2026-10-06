@@ -4,6 +4,7 @@ import { buildDiagnosis } from "./diagnosis.js";
 import { deriveTopics } from "./topics.js";
 import { buildOpportunities } from "./generative.js";
 import { analyzePublicInterest } from "./publicInterest.js";
+import { buildGeoDistribution } from "./geoResearch.js";
 import type { ResearchIdeaInput, ResearchSession } from "../types.js";
 
 const MAX_ARTICLES_KEPT = 24;
@@ -40,14 +41,20 @@ export async function runFullAnalysis(input: ResearchIdeaInput): Promise<Researc
 
   // El interés público (Google Trends) no depende de los temas, así que se
   // calcula en paralelo con `deriveTopics` en vez de encadenarse detrás.
-  const [topics, publicInterest] = await Promise.all([
+  // La distribución geográfica (dónde se investiga) también es independiente.
+  const [topics, publicInterest, geoDistribution] = await Promise.all([
     deriveTopics(articles, topicIds),
     analyzePublicInterest(profile.keywords[0] ?? input.rawText, trendByYear).catch((err) => {
       console.error("[orchestrator] no se pudo analizar interés público (Google Trends):", (err as Error).message);
       return null;
     }),
+    buildGeoDistribution(profile.keywords).catch((err) => {
+      console.error("[orchestrator] no se pudo obtener la distribución geográfica (OpenAlex):", (err as Error).message);
+      return null;
+    }),
   ]);
   diagnosis.publicInterest = publicInterest;
+  diagnosis.geoDistribution = geoDistribution;
 
   const { opportunities, delimitationOptions } = await buildOpportunities(input, diagnosis, topics, articles);
 

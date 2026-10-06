@@ -27,6 +27,13 @@ const authLimiter = rateLimit({
   message: { error: "Demasiados intentos. Intenta de nuevo en unos minutos." },
 });
 
+// El esquema de la base de datos debe existir antes de atender la primera petición
+// (en serverless el arranque en frío y la primera petición ocurren a la vez).
+app.use(async (_req, _res, next) => {
+  await schemaReady;
+  next();
+});
+
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
@@ -48,10 +55,16 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: "Error interno del servidor" });
 });
 
-initSchema()
-  .catch((err) => console.error("[db] error inicializando esquema:", err))
-  .finally(() => {
+const schemaReady = initSchema().catch((err) => console.error("[db] error inicializando esquema:", err));
+
+// En Vercel no hay proceso que escuche en un puerto: la app se exporta y la
+// plataforma la invoca por petición. En local y en Docker sí se levanta el servidor.
+if (!process.env.VERCEL) {
+  schemaReady.finally(() => {
     app.listen(config.port, () => {
       console.log(`ResearchLens API escuchando en http://localhost:${config.port}`);
     });
   });
+}
+
+export default app;
