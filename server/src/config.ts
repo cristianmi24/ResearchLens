@@ -1,7 +1,13 @@
 import dotenv from "dotenv";
 import path from "node:path";
 
-dotenv.config({ path: path.resolve(import.meta.dirname, "../../.env") });
+// En Vercel las variables vienen del panel del proyecto, no de un .env. Además ahí el
+// código puede ejecutarse como CommonJS, donde `import.meta.dirname` es undefined y
+// `path.resolve(undefined)` lanza al cargar el módulo, tumbando toda la API.
+if (!process.env.VERCEL) {
+  const baseDir = import.meta.dirname ?? process.cwd();
+  dotenv.config({ path: path.resolve(baseDir, "../../.env") });
+}
 
 function required(name: string): string {
   const value = process.env[name];
