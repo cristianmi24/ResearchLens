@@ -57,6 +57,14 @@ export const config = {
     apiKey: process.env.YOUTUBE_API_KEY ?? "",
   },
 
+  // Repositorio institucional de la Universidad de Córdoba (DSpace), expuesto
+  // a través de un webhook de n8n (flujo utils_repositorio_unicor_search).
+  unicordoba: {
+    searchUrl:
+      process.env.UNICORDOBA_SEARCH_URL ?? "https://n8n.srv1299487.hstgr.cloud/webhook/repositorio-unicor-search",
+    apiKey: process.env.UNICORDOBA_API_KEY ?? "",
+  },
+
   databaseUrl: process.env.DATABASE_URL ?? "",
 
   auth: {

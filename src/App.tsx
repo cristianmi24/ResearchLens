@@ -15,6 +15,7 @@ const Idea = lazy(() => import("@/pages/Idea").then((m) => ({ default: m.Idea })
 const Analysis = lazy(() => import("@/pages/Analysis").then((m) => ({ default: m.Analysis })));
 const Results = lazy(() => import("@/pages/Results").then((m) => ({ default: m.Results })));
 const ArticleSearch = lazy(() => import("@/pages/ArticleSearch").then((m) => ({ default: m.ArticleSearch })));
+const Unicordoba = lazy(() => import("@/pages/Unicordoba").then((m) => ({ default: m.Unicordoba })));
 const ResearchMap = lazy(() => import("@/pages/ResearchMap").then((m) => ({ default: m.ResearchMap })));
 const Opportunities = lazy(() => import("@/pages/Opportunities").then((m) => ({ default: m.Opportunities })));
 const Refine = lazy(() => import("@/pages/Refine").then((m) => ({ default: m.Refine })));
@@ -51,7 +52,8 @@ export default function App() {
                     <Route path="/analysis" element={<Analysis />} />
                     <Route path="/results" element={<Results />} />
                     <Route path="/article-search" element={<ArticleSearch />} />
-                    <Route path="/map" element={<ResearchMap />} />
+                    <Route path="/unicordoba" element={<Unicordoba />} />
+                    <Route path="/map"element={<ResearchMap />} />
                     <Route path="/opportunities" element={<Opportunities />} />
                     <Route path="/refine" element={<Refine />} />
                     <Route path="/projects" element={<Projects />} />

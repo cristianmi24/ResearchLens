@@ -8,6 +8,7 @@ import { authRouter } from "./routes/auth.js";
 import { researchRouter } from "./routes/research.js";
 import { assistantRouter } from "./routes/assistant.js";
 import { projectsRouter } from "./routes/projects.js";
+import { unicordobaRouter } from "./routes/unicordoba.js";
 import { requireAuth } from "./middleware/requireAuth.js";
 
 const app = express();
@@ -49,6 +50,7 @@ app.use("/api/auth", authLimiter, authRouter);
 app.use("/api/research", requireAuth, researchRouter);
 app.use("/api/assistant", requireAuth, assistantRouter);
 app.use("/api/projects", requireAuth, projectsRouter);
+app.use("/api/unicordoba", requireAuth, unicordobaRouter);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error("[unhandled]", err);
