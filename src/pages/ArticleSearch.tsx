@@ -62,7 +62,7 @@ export function ArticleSearch() {
         <p className="text-sm font-medium text-brand-600">{t("search.badge", "Búsqueda independiente")}</p>
         <h1 className="text-2xl font-semibold text-ink-primary mt-1">{t("search.title", "Nueva búsqueda de artículos")}</h1>
         <p className="text-ink-secondary mt-2">
-          {t("search.subtitle", "Consulta publicaciones en Semantic Scholar, OpenAlex, Crossref, Springer Nature, IEEE Xplore y Scopus sin alterar tu análisis actual. Esta búsqueda no se guarda.")}
+          {t("search.subtitle", "Consulta publicaciones en Semantic Scholar, OpenAlex y Crossref sin alterar tu análisis actual. Esta búsqueda no se guarda.")}
         </p>
       </div>
 
@@ -125,9 +125,6 @@ export function ArticleSearch() {
                   <option value="Semantic Scholar">Semantic Scholar</option>
                   <option value="OpenAlex">OpenAlex</option>
                   <option value="Crossref">Crossref</option>
-                  <option value="Springer Nature">Springer Nature</option>
-                  <option value="IEEE Xplore">IEEE Xplore</option>
-                  <option value="Scopus">Scopus</option>
                 </select>
               </label>
 

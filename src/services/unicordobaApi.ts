@@ -38,3 +38,46 @@ export async function searchUnicordoba(params: UnicordobaSearchParams): Promise<
   });
   return apiFetch<UnicordobaSearchResult>(`/unicordoba/search?${query.toString()}`);
 }
+
+/** Fuentes del panel: el repositorio institucional y las bases con cuota limitada (solo se usan aquí). */
+export type PanelSourceId = "unicordoba" | "ieee" | "springer" | "scopus";
+
+/** Opción del selector del panel: una fuente o todas. */
+export type SourceChoice = PanelSourceId | "all";
+
+/** Fuentes que realmente se consultan para cada opción del selector. */
+export function sourcesFor(choice: SourceChoice): PanelSourceId[] {
+  return choice === "all" ? ["unicordoba", "ieee", "springer", "scopus"] : [choice];
+}
+
+/** Documento normalizado para mostrar resultados de cualquier fuente del panel con la misma tarjeta. */
+export interface PanelDocument {
+  id: string;
+  title: string;
+  authors: string[];
+  year: number;
+  abstract: string;
+  doi: string;
+  source: string;
+}
+
+export interface MultiSourceResult {
+  desdeAnio: number;
+  sources: { id: PanelSourceId; name: string; ok: boolean; count: number }[];
+  articles: PanelDocument[];
+}
+
+export async function searchMultiSource(params: {
+  q: string;
+  sources: PanelSourceId[];
+  size: number;
+  years: number;
+}): Promise<MultiSourceResult> {
+  const query = new URLSearchParams({
+    q: params.q,
+    sources: params.sources.join(","),
+    size: String(params.size),
+    years: String(params.years),
+  });
+  return apiFetch<MultiSourceResult>(`/unicordoba/multi?${query.toString()}`);
+}

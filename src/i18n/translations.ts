@@ -218,7 +218,7 @@ export const translations = {
     // Buscar Literatura
     "search.badge": "Búsqueda independiente",
     "search.title": "Nueva búsqueda de artículos",
-    "search.subtitle": "Consulta publicaciones en Semantic Scholar, OpenAlex, Crossref, Springer Nature, IEEE Xplore y Scopus sin alterar tu análisis actual. Esta búsqueda no se guarda.",
+    "search.subtitle": "Consulta publicaciones en Semantic Scholar, OpenAlex y Crossref sin alterar tu análisis actual. Esta búsqueda no se guarda.",
     "search.formTitle": "Buscar artículos",
     "search.formDesc": "Combina palabras clave con filtros para revisar evidencia más pertinente.",
     "search.queryLabel": "Tema o palabras clave",
@@ -688,7 +688,7 @@ export const translations = {
     // Search Literature
     "search.badge": "Independent Search",
     "search.title": "New Article Search",
-    "search.subtitle": "Search publications in Semantic Scholar, OpenAlex, Crossref, Springer Nature, IEEE Xplore, and Scopus without affecting your current analysis. This search is not saved.",
+    "search.subtitle": "Search publications in Semantic Scholar, OpenAlex, and Crossref without affecting your current analysis. This search is not saved.",
     "search.formTitle": "Search Articles",
     "search.formDesc": "Combine keywords with filters to find the most relevant evidence.",
     "search.queryLabel": "Topic or keywords",
@@ -1158,7 +1158,7 @@ export const translations = {
     // Buscar Literatura
     "search.badge": "Busca independente",
     "search.title": "Nova busca de artigos",
-    "search.subtitle": "Consulte publicações no Semantic Scholar, OpenAlex, Crossref, Springer Nature, IEEE Xplore e Scopus sem alterar sua análise atual. Esta busca não é salva.",
+    "search.subtitle": "Consulte publicações no Semantic Scholar, OpenAlex e Crossref sem alterar sua análise atual. Esta busca não é salva.",
     "search.formTitle": "Buscar artigos",
     "search.formDesc": "Combine palavras-chave com filtros para encontrar as evidências mais relevantes.",
     "search.queryLabel": "Tema ou palavras-chave",
