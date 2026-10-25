@@ -3,7 +3,10 @@ export type ArticleSource =
   | "Crossref"
   | "Semantic Scholar"
   | "arXiv"
-  | "DOAJ";
+  | "DOAJ"
+  | "Springer Nature"
+  | "IEEE Xplore"
+  | "Scopus";
 
 export type ComparisonMatch = "coincide" | "parcial" | "diferente";
 

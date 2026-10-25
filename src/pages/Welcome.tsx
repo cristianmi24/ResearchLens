@@ -1,8 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { BookOpen, FileText, Globe, GraduationCap, Library, Menu, X } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  Globe,
+  GraduationCap,
+  Lightbulb,
+  Map as MapIcon,
+  Menu,
+  Search,
+  Sparkles,
+  Target,
+  X,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/api";
 import { isClerkEnabled } from "@/lib/clerkConfig";
@@ -14,113 +27,66 @@ import "./Welcome.css";
 type AuthMode = "register" | "login";
 
 interface TeamMember {
-  tab: string;
   name: string;
-  role: string;
-  bio: string;
-  stampLeft: string;
-  stampRight: string;
+  initials: string;
+  roleKey: string;
+  bioKey: string;
 }
 
 const teamMembers: TeamMember[] = [
   {
-    tab: "AUTOR",
     name: "Cristian Miguel Peñata Andrades",
-    role: "Estudiante de Tecnología e Informática",
-    bio: "Vinculado a la Universidad de Córdoba (Colombia), donde participa en proyectos de tecnología educativa, sistemas tutores inteligentes y herramientas de apoyo a la investigación académica.",
-    stampLeft: "UNIV. DE CÓRDOBA",
-    stampRight: "INVESTIGACIÓN ACADÉMICA",
+    initials: "CP",
+    roleKey: "welcome.team.roleStudent",
+    bioKey: "welcome.team.bio1",
   },
   {
-    tab: "AUTORA",
     name: "Andreina Esther Sami Almanza",
-    role: "Estudiante de Tecnología e Informática",
-    bio: "Vinculada a la Universidad de Córdoba (Colombia), coautora de este proyecto dentro de la asignatura de Ciencia de Datos.",
-    stampLeft: "UNIV. DE CÓRDOBA",
-    stampRight: "CIENCIA DE DATOS",
+    initials: "AS",
+    roleKey: "welcome.team.roleStudent",
+    bioKey: "welcome.team.bio2",
   },
   {
-    tab: "DOCENTE",
     name: "Alexander Toscano",
-    role: "Docente de la asignatura de Ciencia de Datos",
-    bio: "Docente de la Universidad de Córdoba a cargo de la asignatura de Ciencia de Datos, en cuyo marco se desarrolló este proyecto.",
-    stampLeft: "UNIV. DE CÓRDOBA",
-    stampRight: "CIENCIA DE DATOS",
+    initials: "AT",
+    roleKey: "welcome.team.roleTeacher",
+    bioKey: "welcome.team.bio3",
   },
 ];
 
-interface HeroSource {
-  x: number;
-  y: number;
-  r: number;
-  color: string;
-  label: string;
-}
-
-const connectedSources = [
-  { label: "Semantic Scholar", color: "#2FA89A", icon: GraduationCap },
-  { label: "OpenAlex", color: "#D1993F", icon: Library },
-  { label: "arXiv", color: "#E0636E", icon: FileText },
-  { label: "Crossref", color: "#6B7AE8", icon: BookOpen },
+// Bases de datos conectadas: logo oficial y un color propio para distinguirlas de un vistazo.
+const SOURCE_LOGOS = "https://pub-f692a19a9eeb4a918004610ccd64fcf0.r2.dev";
+const sources: { label: string; logo: string; color: string }[] = [
+  { label: "Semantic Scholar", logo: `${SOURCE_LOGOS}/605274dd4af9b0ca8ac84182_s2-logo.svg`, color: "#5b8cff" },
+  { label: "OpenAlex", logo: `${SOURCE_LOGOS}/openalex.png`, color: "#ff9f43" },
+  { label: "Crossref", logo: `${SOURCE_LOGOS}/crossref.png`, color: "#2ed3b7" },
+  { label: "arXiv", logo: `${SOURCE_LOGOS}/images.png`, color: "#ff6b81" },
+  { label: "Springer Nature", logo: `${SOURCE_LOGOS}/images%20(1).png`, color: "#ffd23f" },
+  { label: "IEEE Xplore", logo: `${SOURCE_LOGOS}/iee.png`, color: "#4cc9f0" },
+  { label: "Scopus", logo: `${SOURCE_LOGOS}/scorpus.png`, color: "#f77fbe" },
+  { label: "Unicórdoba", logo: "/logos/unicordoba.webp", color: "#7bd88f" },
 ];
 
-/** Réplica del network-SVG decorativo original: nodos de fuentes conectados a un
- * nodo central (la búsqueda), con animación SMIL. Puramente presentacional; se
- * genera una sola vez por montaje (useMemo), igual que el script original corría
- * una sola vez al cargar la página. */
-function buildHeroSvg(): string {
-  const W = 1400;
-  const H = 900;
-  const sources: HeroSource[] = [
-    { x: 1080, y: 160, r: 5, color: "#D1993F", label: "OpenAlex" },
-    { x: 1230, y: 340, r: 5, color: "#E0636E", label: "arXiv" },
-    { x: 1190, y: 560, r: 5, color: "#2FA89A", label: "Semantic Scholar" },
-    { x: 1020, y: 700, r: 5, color: "#6B7AE8", label: "Crossref" },
-  ];
-  const center = { x: 780, y: 420 };
-  const satellites = Array.from({ length: 26 }, () => ({
-    x: 700 + Math.random() * 680,
-    y: 60 + Math.random() * 800,
-    r: 1.4 + Math.random() * 1.8,
-  }));
+const features: { icon: LucideIcon; key: string }[] = [
+  { icon: Lightbulb, key: "f1" },
+  { icon: Search, key: "f2" },
+  { icon: MapIcon, key: "f3" },
+  { icon: Target, key: "f4" },
+  { icon: Bot, key: "f5" },
+  { icon: GraduationCap, key: "f6" },
+];
 
-  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+const steps = ["s1", "s2", "s3", "s4"];
 
-  satellites.forEach((s) => {
-    svg += `<circle cx="${s.x}" cy="${s.y}" r="${s.r}" fill="#2C2620" opacity="0.1"/>`;
-  });
+// Acentos de color (tomados del logo) para diferenciar tarjetas y pasos.
+const accents = ["#5b8cff", "#a77bff", "#ff8fc7", "#ffb057", "#2ed3b7", "#4cc9f0"];
 
-  sources.forEach((s, i) => {
-    const midX = (s.x + center.x) / 2 + (Math.random() * 60 - 30);
-    const midY = (s.y + center.y) / 2 + (Math.random() * 60 - 30);
-    const path = `M${s.x},${s.y} Q${midX},${midY} ${center.x},${center.y}`;
-    svg += `<path d="${path}" fill="none" stroke="${s.color}" stroke-opacity="0.45" stroke-width="1.2"
-      stroke-dasharray="600" stroke-dashoffset="600" pathLength="600">
-      <animate attributeName="stroke-dashoffset" from="600" to="0" dur="1.4s" begin="${0.3 + i * 0.18}s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
-    </path>`;
-  });
-
-  svg += `<circle cx="${center.x}" cy="${center.y}" r="0" fill="#2C2620">
-    <animate attributeName="r" from="0" to="6" dur="0.6s" begin="1.6s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
-  </circle>`;
-  svg += `<circle cx="${center.x}" cy="${center.y}" r="0" fill="none" stroke="#2C2620" stroke-opacity="0.3">
-    <animate attributeName="r" from="6" to="34" dur="2.4s" begin="1.8s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" from="0.5" to="0" dur="2.4s" begin="1.8s" repeatCount="indefinite"/>
-  </circle>`;
-
-  sources.forEach((s, i) => {
-    svg += `<circle cx="${s.x}" cy="${s.y}" r="0" fill="${s.color}">
-      <animate attributeName="r" from="0" to="${s.r}" dur="0.5s" begin="${0.2 + i * 0.18}s" fill="freeze"/>
-    </circle>`;
-    svg += `<circle cx="${s.x}" cy="${s.y}" r="${s.r + 6}" fill="none" stroke="${s.color}" stroke-opacity="0.4">
-      <animate attributeName="r" from="${s.r}" to="${s.r + 14}" dur="2.8s" begin="${1 + i * 0.4}s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" from="0.45" to="0" dur="2.8s" begin="${1 + i * 0.4}s" repeatCount="indefinite"/>
-    </circle>`;
-  });
-
-  svg += `</svg>`;
-  return svg;
-}
+// Logos institucionales que acompañan al de Zetia en el menú (public/logos, recortados en WebP).
+const partners = [
+  { src: "/logos/unicordoba.webp", name: "Universidad de Córdoba" },
+  { src: "/logos/edutlan.webp", name: "Grupo de investigación EDUTLAN" },
+  { src: "/logos/labsie.webp", name: "LABSIE" },
+];
 
 export function Welcome() {
   const navigate = useNavigate();
@@ -143,19 +109,8 @@ export function Welcome() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const heroSvg = useMemo(() => buildHeroSvg(), []);
-
-  const [activeMember, setActiveMember] = useState(0);
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveMember((i) => (i + 1) % teamMembers.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 40);
+    const onScroll = () => setIsScrolled(window.scrollY > 30);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -176,7 +131,6 @@ export function Welcome() {
     return () => io.disconnect();
   }, []);
 
-  // Close lang dropdown on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (langRef.current && !langRef.current.contains(e.target as Node)) {
@@ -187,8 +141,10 @@ export function Welcome() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  function openModal() {
+  function openModal(nextMode: AuthMode = "login") {
+    setMode(nextMode);
     setError(null);
+    setIsMenuOpen(false);
     setIsModalOpen(true);
   }
 
@@ -216,79 +172,65 @@ export function Welcome() {
     }
   }
 
-  return (
-    <div className="trama-landing" ref={containerRef}>
-      <nav className={isScrolled ? "scrolled" : ""}>
-        <div className="nav-left">
-          <button
-            type="button"
-            className="nav-toggle"
-            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
-            onClick={() => setIsMenuOpen((v) => !v)}
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              {isMenuOpen ? (
-                <motion.span
-                  key="close"
-                  initial={{ opacity: 0, rotate: -45 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: 45 }}
-                  transition={{ duration: 0.15 }}
-                  className="nav-toggle-icon"
-                >
-                  <X size={19} />
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="menu"
-                  initial={{ opacity: 0, rotate: 45 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: -45 }}
-                  transition={{ duration: 0.15 }}
-                  className="nav-toggle-icon"
-                >
-                  <Menu size={19} />
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
-          <a href="#inicio" className="brand">
-            <span className="brand-mark">
-              <img src="/logo.png" alt="ResearchLens logo" />
-            </span>
-            ResearchLens
-          </a>
-        </div>
-        {isMenuOpen && (
-          <button type="button" aria-label="Cerrar menú" className="nav-scrim" onClick={() => setIsMenuOpen(false)} />
-        )}
-        <div className={`nav-links ${isMenuOpen ? "open" : ""}`}>
-          <a href="#inicio" onClick={() => setIsMenuOpen(false)}>
-            {t("welcome.nav.home")}
-          </a>
-          <a href="#quienes-somos" onClick={() => setIsMenuOpen(false)}>
-            {t("welcome.nav.about")}
-          </a>
-          <a href="#como-usarla" onClick={() => setIsMenuOpen(false)}>
-            {t("welcome.nav.how")}
-          </a>
+  const navLinks = [
+    { href: "#inicio", label: t("welcome.nav.home") },
+    { href: "#que-hace", label: t("welcome.nav.features") },
+    { href: "#como-funciona", label: t("welcome.nav.how") },
+    { href: "#quienes-somos", label: t("welcome.nav.about") },
+  ];
 
-          {/* Selector de idioma en la nav */}
-          <div className="nav-lang-selector" ref={langRef}>
+  return (
+    <div className="zetia-landing" ref={containerRef}>
+      {/* Foto de estudiantes (public/fondo.png) bajo un velo blanco para que el texto se lea. */}
+      <div className="photo-bg" aria-hidden="true" />
+
+      <nav className={isScrolled ? "scrolled" : ""}>
+        <div className="brand-group">
+          <a href="#inicio" className="brand" aria-label="Zetia">
+            <img src="/logos/zetia.webp" alt="Zetia" />
+          </a>
+          <span className="brand-divider" aria-hidden="true" />
+          <div className="brand-partners">
+            {partners.map((partner) => (
+              <img key={partner.name} src={partner.src} alt={partner.name} title={partner.name} />
+            ))}
+          </div>
+        </div>
+
+        {isMenuOpen && (
+          <button type="button" aria-label={t("welcome.nav.closeMenu")} className="nav-scrim" onClick={() => setIsMenuOpen(false)} />
+        )}
+
+        <div className={`nav-links ${isMenuOpen ? "open" : ""}`}>
+          {navLinks.map((link) => (
+            <a key={link.href} href={link.href} onClick={() => setIsMenuOpen(false)}>
+              {link.label}
+            </a>
+          ))}
+          {/* En móvil los logos institucionales no caben en la barra: se muestran aquí. */}
+          <div className="nav-partners">
+            {partners.map((partner) => (
+              <img key={partner.name} src={partner.src} alt={partner.name} title={partner.name} />
+            ))}
+          </div>
+        </div>
+
+        <div className="nav-actions">
+          <div className="lang-selector" ref={langRef}>
             <button
               type="button"
-              className="nav-lang-btn"
+              className="lang-btn"
               onClick={() => setIsLangOpen((v) => !v)}
-              aria-label="Cambiar idioma"
+              aria-label={t("welcome.nav.language")}
+              aria-expanded={isLangOpen}
             >
-              <Globe size={14} />
+              <Globe size={15} />
               <span>{LANGUAGE_OPTIONS.find((o) => o.code === language)?.shortLabel ?? "ES"}</span>
-              <span className={`lang-chevron ${isLangOpen ? "open" : ""}`}>▾</span>
             </button>
             <AnimatePresence>
               {isLangOpen && (
                 <motion.div
-                  className="nav-lang-dropdown"
+                  className="lang-dropdown"
                   initial={{ opacity: 0, y: -6, scale: 0.97 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -6, scale: 0.97 }}
@@ -302,7 +244,6 @@ export function Welcome() {
                       onClick={() => {
                         setLanguage(opt.code);
                         setIsLangOpen(false);
-                        setIsMenuOpen(false);
                       }}
                     >
                       <span>{opt.flag}</span>
@@ -315,253 +256,210 @@ export function Welcome() {
             </AnimatePresence>
           </div>
 
-          <motion.button
-            type="button"
-            className="enter-btn"
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => {
-              setIsMenuOpen(false);
-              openModal();
-            }}
-          >
+          <button type="button" className="btn-enter" onClick={() => openModal("login")}>
             {t("welcome.nav.enter")}
-          </motion.button>
+          </button>
+
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-label={isMenuOpen ? t("welcome.nav.closeMenu") : t("welcome.nav.openMenu")}
+            onClick={() => setIsMenuOpen((v) => !v)}
+          >
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </nav>
 
+      {/* ---------- HERO ---------- */}
       <section className="hero" id="inicio">
-        <div className="hero-canvas" dangerouslySetInnerHTML={{ __html: heroSvg }} />
-        <div className="hero-veil" />
-        <div className="hero-content">
-          <span className="eyebrow">{t("welcome.eyebrow")}</span>
-          <h1>
-            {t("welcome.hero.title1")}
-            <br />
-            {t("welcome.hero.title2")}
-            <br />
-            <em>{t("welcome.hero.title3")}</em>
-          </h1>
-          <p className="lead">{t("welcome.hero.lead")}</p>
-          <div className="hero-actions">
-            <motion.button
-              type="button"
-              className="btn-primary"
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={openModal}
-            >
+        <div className="hero-copy">
+          <motion.span
+            className="pill"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Sparkles size={14} />
+            {t("welcome.hero.badge")}
+          </motion.span>
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.08 }}
+          >
+            {t("welcome.hero.title1")} <span className="gradient-text">{t("welcome.hero.title2")}</span>
+          </motion.h1>
+          <motion.p
+            className="lead"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.16 }}
+          >
+            {t("welcome.hero.lead")}
+          </motion.p>
+          <motion.div
+            className="hero-actions"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.24 }}
+          >
+            <button type="button" className="btn-primary" onClick={() => openModal("register")}>
               {t("welcome.hero.cta")}
-            </motion.button>
-            <a href="#como-usarla" className="btn-ghost">
-              {t("welcome.hero.learnMore")}
+              <ArrowRight size={18} />
+            </button>
+            <a href="#como-funciona" className="btn-ghost">
+              {t("welcome.hero.secondary")}
             </a>
-          </div>
+          </motion.div>
+          <motion.dl
+            className="hero-stats"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            {["stat1", "stat2", "stat3"].map((stat) => (
+              <div key={stat}>
+                <dt>{t(`welcome.hero.${stat}.value`)}</dt>
+                <dd>{t(`welcome.hero.${stat}.label`)}</dd>
+              </div>
+            ))}
+          </motion.dl>
         </div>
-        <div className="source-tags">
-          <span className="label">{t("welcome.hero.connectedSources")}</span>
-          <div className="tag-grid">
-            {connectedSources.map((source) => (
-              <span
-                key={source.label}
-                className="tag"
-                style={{
-                  color: source.color,
-                  borderColor: `color-mix(in srgb, ${source.color} 45%, transparent)`,
-                  backgroundColor: `color-mix(in srgb, ${source.color} 10%, transparent)`,
-                }}
+      </section>
+
+      {/* Todo lo que va después del hero se apoya en un velo oscuro para que el texto se lea sobre el fondo ilustrado. */}
+      <div className="landing-body">
+      {/* ---------- FUENTES ---------- */}
+      <section className="sources" aria-label={t("welcome.sources.title")}>
+        <p className="sources-title">{t("welcome.sources.title")}</p>
+        <div className="marquee">
+          <div className="marquee-track">
+            {[...sources, ...sources].map((source, i) => (
+              <span key={`${source.label}-${i}`} className="source-chip"
+                aria-hidden={i >= sources.length}
+                style={{ "--c": source.color } as CSSProperties}
               >
-                <source.icon size={13} strokeWidth={2.25} />
-                {source.label}
+                <img src={source.logo} alt={i < sources.length ? source.label : ""} decoding="async" />
               </span>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="quienes-somos">
-        <div className="section-inner">
-          <span className="section-tag">{t("welcome.about.tag")}</span>
-          <h2 className="section-title reveal">{t("welcome.about.title")}</h2>
-          <p className="section-sub reveal">{t("welcome.about.subtitle")}</p>
-
-          <div className="card-index">
-            <div>
-              <div className="index-card reveal">
-                <span className="tab mono">{teamMembers[activeMember].tab}</span>
-                <h3>{teamMembers[activeMember].name}</h3>
-                <span className="role">{teamMembers[activeMember].role}</span>
-                <p>{teamMembers[activeMember].bio}</p>
-                <div className="stamp">
-                  <span>{teamMembers[activeMember].stampLeft}</span>
-                  <span>{teamMembers[activeMember].stampRight}</span>
-                </div>
-              </div>
-
-              <div className="carousel-controls">
-                <div className="carousel-dots">
-                  {teamMembers.map((member, i) => (
-                    <button
-                      key={member.name + i}
-                      type="button"
-                      className={i === activeMember ? "active" : ""}
-                      aria-label={`Ver a ${member.name}`}
-                      onClick={() => setActiveMember(i)}
-                    />
-                  ))}
-                </div>
-                <div className="carousel-arrows">
-                  <button
-                    type="button"
-                    aria-label="Anterior"
-                    onClick={() => setActiveMember((i) => (i - 1 + teamMembers.length) % teamMembers.length)}
-                  >
-                    ←
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Siguiente"
-                    onClick={() => setActiveMember((i) => (i + 1) % teamMembers.length)}
-                  >
-                    →
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mission-block reveal">
-              <p>{t("welcome.about.mission1")}</p>
-              <p>{t("welcome.about.mission2")}</p>
-              <p>{t("welcome.about.mission3")}</p>
-            </div>
-          </div>
+      {/* ---------- QUÉ HACE ---------- */}
+      <section id="que-hace" className="section">
+        <div className="section-head reveal">
+          <span className="section-tag">{t("welcome.features.tag")}</span>
+          <h2>{t("welcome.features.title")}</h2>
+          <p>{t("welcome.features.subtitle")}</p>
+        </div>
+        <div className="feature-grid">
+          {features.map((feature, i) => (
+            <article
+              key={feature.key}
+              className="feature-card reveal"
+              style={{ transitionDelay: `${i * 60}ms`, "--c": accents[i % accents.length] } as CSSProperties}
+            >
+              <span className="feature-icon">
+                <feature.icon size={22} />
+              </span>
+              <h3>{t(`welcome.features.${feature.key}.title`)}</h3>
+              <p>{t(`welcome.features.${feature.key}.desc`)}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section id="como-usarla">
-        <div className="section-inner">
+      {/* ---------- CÓMO FUNCIONA ---------- */}
+      <section id="como-funciona" className="section">
+        <div className="section-head reveal">
           <span className="section-tag">{t("welcome.how.tag")}</span>
-          <h2 className="section-title reveal">{t("welcome.how.title")}</h2>
-          <p className="section-sub reveal">{t("welcome.how.subtitle")}</p>
+          <h2>{t("welcome.how.title")}</h2>
+          <p>{t("welcome.how.subtitle")}</p>
+        </div>
+        <ol className="steps">
+          {steps.map((step, i) => (
+            <li
+              key={step}
+              className="step reveal"
+              style={{ transitionDelay: `${i * 80}ms`, "--c": accents[i % accents.length] } as CSSProperties}
+            >
+              <span className="step-num">{String(i + 1).padStart(2, "0")}</span>
+              <h3>{t(`welcome.how.${step}.title`)}</h3>
+              <p>{t(`welcome.how.${step}.desc`)}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
 
-          <div className="steps">
-            <div className="step reveal">
-              <span className="step-num mono">01</span>
-              <div>
-                <h3>{t("welcome.how.step1.title")}</h3>
-                <p>{t("welcome.how.step1.desc")}</p>
-              </div>
-              <div className="step-visual">
-                <div className="node-chip">
-                  <span className="dot" />
-                  {t("welcome.how.step1.visual")}
+      {/* ---------- QUIÉNES SOMOS ---------- */}
+      <section id="quienes-somos" className="section">
+        <div className="about">
+          <div className="about-copy reveal">
+            <span className="section-tag">{t("welcome.about.tag")}</span>
+            <h2>{t("welcome.about.title")}</h2>
+            <p>{t("welcome.about.mission1")}</p>
+            <p>{t("welcome.about.mission2")}</p>
+            <ul className="values">
+              {["v1", "v2", "v3"].map((value) => (
+                <li key={value}>
+                  <Sparkles size={14} />
+                  {t(`welcome.about.${value}`)}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="team">
+            {teamMembers.map((member, i) => (
+              <article key={member.name} className="team-card reveal" style={{ transitionDelay: `${i * 80}ms` }}>
+                <span className="avatar">{member.initials}</span>
+                <div>
+                  <h3>{member.name}</h3>
+                  <span className="role">{t(member.roleKey)}</span>
+                  <p>{t(member.bioKey)}</p>
                 </div>
-              </div>
-            </div>
-
-            <div className="step reveal">
-              <span className="step-num mono">02</span>
-              <div>
-                <h3>{t("welcome.how.step2.title")}</h3>
-                <p>{t("welcome.how.step2.desc")}</p>
-              </div>
-              <div className="step-visual">
-                <span className="node-chip">
-                  <span className="dot" />
-                  Semantic Scholar
-                </span>
-                <span className="node-chip openalex">
-                  <span className="dot" />
-                  OpenAlex
-                </span>
-                <span className="node-chip arxiv">
-                  <span className="dot" />
-                  arXiv
-                </span>
-                <span className="node-chip crossref">
-                  <span className="dot" />
-                  Crossref
-                </span>
-              </div>
-            </div>
-
-            <div className="step reveal">
-              <span className="step-num mono">03</span>
-              <div>
-                <h3>{t("welcome.how.step3.title")}</h3>
-                <p>{t("welcome.how.step3.desc")}</p>
-              </div>
-              <div className="step-visual">
-                <div className="node-chip">
-                  <span className="dot" />
-                  {t("welcome.how.step3.visual")}
-                </div>
-              </div>
-            </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <footer className="footer-minimal">
-        <div className="footer-container">
-          <div className="footer-main">
-            <div className="footer-brand-section">
-              <a href="#inicio" className="brand footer-brand">
-                <span className="brand-mark">
-                  <img src="/logo.png" alt="ResearchLens logo" />
-                </span>
-                ResearchLens
-              </a>
-              <p className="footer-tagline">{t("welcome.footer.tagline")}</p>
-              <div className="footer-status-pill">
-                <span className="status-indicator-dot" />
-                <span>{t("welcome.footer.status")}</span>
-              </div>
-            </div>
+      {/* ---------- CTA FINAL ---------- */}
+      <section className="section">
+        <div className="cta-band reveal">
+          <h2>{t("welcome.cta.title")}</h2>
+          <p>{t("welcome.cta.desc")}</p>
+          <button type="button" className="btn-primary" onClick={() => openModal("register")}>
+            {t("welcome.cta.btn")}
+            <ArrowRight size={18} />
+          </button>
+        </div>
+      </section>
 
-            <div className="footer-links-grid">
-              <div className="footer-link-group">
-                <a href="#inicio">{t("welcome.nav.home")}</a>
-                <a href="#quienes-somos">{t("welcome.nav.about")}</a>
-                <a href="#como-usar">{t("welcome.nav.how")}</a>
-              </div>
-              <div className="footer-link-group">
-                <Link to="/privacidad">{t("welcome.footer.privacy")}</Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("login");
-                    setIsModalOpen(true);
-                  }}
-                  className="footer-enter-link"
-                >
-                  {t("welcome.nav.enter")} →
-                </button>
-              </div>
-            </div>
+      <footer className="footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <p>{t("welcome.footer.tagline")}</p>
           </div>
-
-          <div className="footer-divider" />
-
-          <div className="footer-bottom">
-            <div className="footer-legal">
-              <p className="footer-rights">
-                © {new Date().getFullYear()} ResearchLens. {t("welcome.footer.rights")}
-              </p>
-              <p className="footer-credits">{t("welcome.footer.credits")}</p>
-            </div>
-            <a href="#inicio" className="back-to-top-btn" aria-label={t("welcome.footer.backToTop")}>
-              <span>{t("welcome.footer.backToTop")}</span>
-              <span className="back-arrow">↑</span>
-            </a>
+          <div className="footer-links">
+            {navLinks.map((link) => (
+              <a key={link.href} href={link.href}>{link.label}</a>
+            ))}
+            <Link to="/privacidad">{t("welcome.footer.privacy")}</Link>
           </div>
+        </div>
+        <div className="footer-bottom">
+          <p>© {new Date().getFullYear()} Zetia · {t("welcome.footer.credits")}</p>
+          <a href="#inicio">{t("welcome.footer.backToTop")} ↑</a>
         </div>
       </footer>
+      </div>
 
       <AnimatePresence>
         {isModalOpen && (
           <motion.div
-            className="modal-overlay open"
+            className="modal-overlay"
             onClick={(e) => e.target === e.currentTarget && setIsModalOpen(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -570,18 +468,16 @@ export function Welcome() {
           >
             <motion.div
               className="modal-box"
+              role="dialog"
+              aria-modal="true"
               initial={{ opacity: 0, y: 20, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
             >
-              <button type="button" className="modal-close" onClick={() => setIsModalOpen(false)}>
-                {t("auth.modal.close")}
+              <button type="button" className="modal-close" onClick={() => setIsModalOpen(false)} aria-label={t("auth.modal.close")}>
+                <X size={18} />
               </button>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                <img src="/logo.png" alt="ResearchLens" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
-                <span className="section-tag" style={{ margin: 0 }}>{t("auth.modal.tag")}</span>
-              </div>
               <h3>{mode === "register" ? t("auth.modal.registerTitle") : t("auth.modal.loginTitle")}</h3>
 
               <div className="auth-tabs">
@@ -700,28 +596,22 @@ export function Welcome() {
                 </AnimatePresence>
 
                 {error && (
-                  <motion.p
-                    className="auth-error"
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
+                  <motion.p className="auth-error" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
                     {error}
                   </motion.p>
                 )}
 
-                <motion.button
+                <button
                   type="submit"
                   className="btn-primary auth-submit"
                   disabled={isSubmitting || (mode === "register" && !acceptedTerms)}
-                  whileHover={isSubmitting ? undefined : { y: -2 }}
-                  whileTap={isSubmitting ? undefined : { scale: 0.98 }}
                 >
                   {isSubmitting
                     ? t("auth.modal.submitting")
                     : mode === "register"
                     ? t("auth.modal.submitRegister")
                     : t("auth.modal.submitLogin")}
-                </motion.button>
+                </button>
               </form>
 
               {isClerkEnabled && <SocialLoginButtons />}

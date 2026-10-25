@@ -10,8 +10,7 @@ export function PrivacyPolicy() {
     <div className="min-h-dvh bg-[var(--color-surface)] px-4 py-10 animate-fade-in">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="ResearchLens logo" className="h-8 w-8 object-contain rounded-lg shadow-xs" />
-          <span className="font-semibold text-ink-primary tracking-tight">ResearchLens</span>
+          <img src="/Zetia.png" alt="Zetia logo" className="h-10 w-10 object-contain rounded-lg shadow-xs" />
         </div>
 
         <div>

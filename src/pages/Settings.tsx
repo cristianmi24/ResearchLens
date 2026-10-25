@@ -41,7 +41,7 @@ export function Settings() {
     >
       <motion.div variants={fadeUp}>
         <h1 className="text-2xl font-semibold text-ink-primary">{t("settings.title", "Configuración")}</h1>
-        <p className="text-ink-secondary mt-2">{t("settings.subtitle", "Preferencias generales de ResearchLens.")}</p>
+        <p className="text-ink-secondary mt-2">{t("settings.subtitle", "Preferencias generales de Zetia.")}</p>
       </motion.div>
 
       <motion.div variants={fadeUp}>

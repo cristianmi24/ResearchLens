@@ -41,6 +41,9 @@ app.get("/api/health", (_req, res) => {
     qwen: Boolean(config.qwen.apiKey),
     database: Boolean(config.databaseUrl),
     auth: Boolean(config.auth.jwtSecret),
+    springer: Boolean(config.springer.apiKey),
+    ieee: Boolean(config.ieee.apiKey),
+    scopus: Boolean(config.scopus.apiKey),
   });
 });
 

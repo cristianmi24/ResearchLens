@@ -5,7 +5,15 @@
  * el cambio aquí.
  */
 
-export type ArticleSource = "OpenAlex" | "Crossref" | "Semantic Scholar" | "arXiv" | "DOAJ";
+export type ArticleSource =
+  | "OpenAlex"
+  | "Crossref"
+  | "Semantic Scholar"
+  | "arXiv"
+  | "DOAJ"
+  | "Springer Nature"
+  | "IEEE Xplore"
+  | "Scopus";
 
 export type ComparisonMatch = "coincide" | "parcial" | "diferente";
 

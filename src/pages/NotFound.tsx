@@ -7,8 +7,7 @@ export function NotFound() {
     <div className="min-h-dvh bg-surface px-4 py-10 flex items-center justify-center">
       <div className="max-w-md w-full text-center space-y-6 animate-fade-in">
         <div className="flex items-center justify-center gap-2.5">
-          <img src="/logo.png" alt="ResearchLens logo" className="h-8 w-8 object-contain rounded-lg shadow-xs" />
-          <span className="font-semibold text-ink-primary">ResearchLens</span>
+          <img src="/Zetia.png" alt="Zetia logo" className="h-10 w-10 object-contain rounded-lg shadow-xs" />
         </div>
 
         <div className="flex items-center justify-center">
@@ -24,7 +23,7 @@ export function NotFound() {
           <p className="text-6xl font-bold text-ink-primary tracking-tight">404</p>
           <h1 className="mt-2 text-xl font-semibold text-ink-primary">Esta página no existe</h1>
           <p className="text-ink-secondary mt-2 leading-relaxed">
-            El enlace que seguiste no corresponde a ninguna sección de ResearchLens. Puede que la ruta haya
+            El enlace que seguiste no corresponde a ninguna sección de Zetia. Puede que la ruta haya
             cambiado o que tengas un error de escritura en la URL.
           </p>
         </div>

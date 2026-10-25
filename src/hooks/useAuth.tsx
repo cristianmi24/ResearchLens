@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     // Si el usuario entró con Google/Microsoft/Facebook/Apple/GitHub, Clerk mantiene su propia sesión
     // activa en el navegador aparte de este JWT. Sin cerrarla aquí, el próximo intento de login social
-    // falla con "You're already signed in" aunque el usuario ya se deslogueó de ResearchLens.
+    // falla con "You're already signed in" aunque el usuario ya se deslogueó de Zetia.
     void window.Clerk?.signOut().catch(() => {});
   }, []);
 

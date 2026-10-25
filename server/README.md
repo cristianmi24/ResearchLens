@@ -1,6 +1,6 @@
-# ResearchLens API
+# Zetia API
 
-Backend real de ResearchLens. Sustituye los MOCK_DATA del frontend consultando
+Backend real de Zetia. Sustituye los MOCK_DATA del frontend consultando
 fuentes académicas y de IA reales.
 
 ## Fuentes integradas

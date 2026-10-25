@@ -36,7 +36,7 @@ export function SsoSync() {
         setSession(token, user);
         navigate("/inicio", { replace: true });
       } catch (err) {
-        // Si la sincronización con el backend falla, Clerk queda "logueado" pero ResearchLens nunca
+        // Si la sincronización con el backend falla, Clerk queda "logueado" pero Zetia nunca
         // llegó a crear la sesión: sin cerrar Clerk aquí, cualquier botón social posterior fallaría de
         // inmediato con "You're already signed in", dejando al usuario sin forma de reintentar.
         await signOut().catch(() => {});

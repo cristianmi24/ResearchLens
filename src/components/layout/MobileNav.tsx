@@ -39,8 +39,7 @@ export function MobileNav() {
           >
             <Menu size={20} />
           </button>
-          <img src="/logo.png" alt="ResearchLens logo" className="h-7 w-7 object-contain rounded-md shadow-xs" />
-          <span className="font-semibold text-ink-primary tracking-tight text-sm">ResearchLens</span>
+          <img src="/Zetia.png" alt="Zetia logo" className="h-9 w-9 object-contain rounded-md shadow-xs" />
         </div>
 
         {/* Desplegable de idioma compacto en el header */}
@@ -116,7 +115,7 @@ export function MobileNav() {
             >
               <div className="flex items-center justify-between h-14 px-4 border-b border-border shrink-0">
                 <div className="flex items-center gap-2">
-                  <img src="/logo.png" alt="ResearchLens logo" className="h-6 w-6 object-contain rounded-md" />
+                  <img src="/Zetia.png" alt="Zetia logo" className="h-6 w-6 object-contain rounded-md" />
                   <span className="font-semibold text-ink-primary text-sm">{t("nav.menu", "Menú")}</span>
                 </div>
                 <button

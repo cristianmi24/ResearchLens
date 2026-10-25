@@ -3,7 +3,7 @@ import type { AssistantMessage } from "@/types/assistant";
 export const mockAssistantWelcome: AssistantMessage = {
   id: "msg-welcome",
   role: "assistant",
-  text: "Hola, soy tu asistente de investigación. Puedo explicarte cómo funciona ResearchLens (sin gastar IA para eso, respondo al instante) y también responder preguntas sobre la literatura que encontramos para tu idea, citando siempre las fuentes consultadas. ¿Qué te gustaría saber?",
+  text: "Hola, soy tu asistente de investigación. Puedo explicarte cómo funciona Zetia (sin gastar IA para eso, respondo al instante) y también responder preguntas sobre la literatura que encontramos para tu idea, citando siempre las fuentes consultadas. ¿Qué te gustaría saber?",
   createdAt: new Date().toISOString(),
   source: "local",
 };

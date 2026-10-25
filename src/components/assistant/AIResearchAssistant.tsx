@@ -55,7 +55,7 @@ export function AIResearchAssistant() {
     ]);
     setInput("");
 
-    // Primero se busca en la información fija de cómo funciona ResearchLens (sin IA, sin red, sin
+    // Primero se busca en la información fija de cómo funciona Zetia (sin IA, sin red, sin
     // costo). Solo si no hay una coincidencia razonable ahí, se le pregunta a Qwen sobre los artículos
     // ya recuperados para esta búsqueda.
     const localMatch = findBestHelpAnswer(trimmed, helpKnowledgeBase);
@@ -110,7 +110,7 @@ export function AIResearchAssistant() {
           open && "hidden"
         )}
       >
-        <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain rounded-full bg-white/20 p-0.5" />
+        <img src="/Zetia.png" alt="Zetia" className="h-6 w-6 object-contain rounded-full bg-white/20 p-0.5" />
         {t("assistant.button", "Preguntar al asistente")}
       </button>
 
@@ -132,13 +132,13 @@ export function AIResearchAssistant() {
               />
               <div className="flex items-center justify-between px-5 h-16">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <img src="/logo.png" alt="Asistente" className="h-9 w-9 shrink-0 object-contain rounded-full bg-brand-50 p-0.5 shadow-sm" />
+                  <img src="/Zetia.png" alt="Asistente de Zetia" className="h-9 w-9 shrink-0 object-contain rounded-full bg-brand-50 p-0.5 shadow-sm" />
                   <div className="min-w-0">
                     <p className="font-serif font-semibold text-ink-primary leading-tight truncate">
                       {t("assistant.title", "Asistente de investigación")}
                     </p>
                     <p className="text-xs text-ink-muted leading-tight">
-                      {t("assistant.subtitle", "Cómo funciona ResearchLens y tu búsqueda")}
+                      {t("assistant.subtitle", "Cómo funciona Zetia y tu búsqueda")}
                     </p>
                   </div>
                 </div>

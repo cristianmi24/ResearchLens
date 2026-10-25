@@ -102,8 +102,8 @@ export function Home() {
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-slate-900/80 text-cyan-300 border border-cyan-500/35 shadow-[0_0_18px_rgba(6,182,212,0.25)] backdrop-blur-md mb-5"
           >
-            <img src="/logo.png" alt="ResearchLens logo" className="h-5 w-5 object-contain rounded-full shadow-xs" />
-            <span>{t("home.badge", "ResearchLens · Asistente Académico")}</span>
+            <img src="/Zetia.png" alt="Zetia logo" className="h-5 w-5 object-contain rounded-full shadow-xs" />
+            <span>{t("home.badge", "Zetia · Asistente Académico")}</span>
           </motion.div>
 
           <motion.h1

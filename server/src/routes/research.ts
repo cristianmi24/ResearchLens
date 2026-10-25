@@ -15,6 +15,9 @@ import { searchVideos } from "../lib/youtube.js";
 import { searchPapers as searchSemanticPapers } from "../lib/semanticScholar.js";
 import { searchWorks as searchOpenAlexWorks, searchWorksByGeo } from "../lib/openalex.js";
 import { searchWorks as searchCrossrefWorks } from "../lib/crossref.js";
+import { searchRecords as searchSpringerRecords } from "../lib/springer.js";
+import { searchArticles as searchIeeeArticles } from "../lib/ieee.js";
+import { searchDocuments as searchScopusDocuments } from "../lib/scopus.js";
 import type { RefineFormInput, ResearchIdeaInput, UsageStatus } from "../types.js";
 
 export const researchRouter = Router();
@@ -93,12 +96,24 @@ researchRouter.get("/article-search", async (req, res) => {
     const year = Number(req.query.year ?? 0);
     if (!searchQuery) return res.status(400).json({ error: "query es requerido" });
     const query = [searchQuery, category].filter(Boolean).join(" ");
-    const [semanticResult, openAlexResult, crossrefPapers] = await Promise.all([
+    // Springer Nature, IEEE Xplore y Scopus solo se consultan aquí (no en el análisis)
+    // y devuelven [] mientras no tengan su API key configurada.
+    const [semanticResult, openAlexResult, crossrefPapers, springerPapers, ieeePapers, scopusPapers] = await Promise.all([
       searchSemanticPapers(query, 10),
       searchOpenAlexWorks(query, 10),
       searchCrossrefWorks(query, 10),
+      searchSpringerRecords(query, 10),
+      searchIeeeArticles(query, 10),
+      searchScopusDocuments(query, 10),
     ]);
-    const allPapers = [...semanticResult.articles, ...openAlexResult.articles, ...crossrefPapers].filter(
+    const allPapers = [
+      ...semanticResult.articles,
+      ...openAlexResult.articles,
+      ...crossrefPapers,
+      ...springerPapers,
+      ...ieeePapers,
+      ...scopusPapers,
+    ].filter(
       (paper) => !year || paper.year === year
     );
     res.json(allPapers);

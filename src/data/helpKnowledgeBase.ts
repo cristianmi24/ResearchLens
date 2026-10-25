@@ -8,17 +8,17 @@ export interface HelpEntry {
 }
 
 /**
- * Base de conocimiento local sobre cómo funciona ResearchLens. El asistente de ayuda busca aquí con un
+ * Base de conocimiento local sobre cómo funciona Zetia. El asistente de ayuda busca aquí con un
  * comparador de palabras clave (ver utils/helpMatcher.ts) — NUNCA llama a Qwen ni a ningún otro modelo,
  * así que responde gratis, al instante, y solo con información real y verificada del sistema.
  */
 export const helpKnowledgeBase: HelpEntry[] = [
   {
     id: "que-es",
-    question: "¿Qué es ResearchLens?",
-    keywords: ["que es", "researchlens", "proyecto", "para que sirve", "sistema", "app", "plataforma"],
+    question: "¿Qué es Zetia?",
+    keywords: ["que es", "zetia", "researchlens", "proyecto", "para que sirve", "sistema", "app", "plataforma"],
     answer:
-      "ResearchLens convierte una idea de investigación escrita en lenguaje natural en un diagnóstico " +
+      "Zetia convierte una idea de investigación escrita en lenguaje natural en un diagnóstico " +
       "fundamentado: busca literatura científica real en cuatro fuentes académicas al mismo tiempo, calcula " +
       "qué tan parecida es tu idea a lo que ya existe, te muestra qué tan explorado está el tema y te " +
       "sugiere posibles oportunidades de investigación — todo en una sola búsqueda.",
@@ -77,7 +77,7 @@ export const helpKnowledgeBase: HelpEntry[] = [
     answer:
       "De cuatro fuentes académicas reales, consultadas en paralelo: OpenAlex (fuente principal, conteos y " +
       "tendencias por año), Semantic Scholar, Crossref y arXiv (preprints recientes). Si alguna fuente " +
-      "falla o responde 'demasiadas solicitudes', ResearchLens reintenta con pausas cada vez más largas; " +
+      "falla o responde 'demasiadas solicitudes', Zetia reintenta con pausas cada vez más largas; " +
       "si aun así no responde, el resto del análisis sigue con las fuentes que sí funcionaron, y te lo " +
       "indica en el panel de 'Fuentes consultadas'.",
   },
@@ -163,7 +163,7 @@ export const helpKnowledgeBase: HelpEntry[] = [
     ],
     answer:
       "Este asistente de ayuda (con el que hablas ahora) responde solo con información fija sobre cómo " +
-      "funciona ResearchLens, sin usar ningún modelo de IA — por eso es instantáneo y gratis. El botón " +
+      "funciona Zetia, sin usar ningún modelo de IA — por eso es instantáneo y gratis. El botón " +
       "'Preguntar al asistente' (abajo a la derecha, dentro de una búsqueda) es distinto: sí usa un modelo " +
       "de IA (Qwen) para responder preguntas sobre los artículos que ya se encontraron para tu idea, " +
       "citando siempre sus fuentes reales y sin inventar datos que no estén en ellas.",
@@ -178,7 +178,7 @@ export const helpKnowledgeBase: HelpEntry[] = [
     answer:
       "Puedes crear una cuenta con nombre, apellido, correo y una contraseña de mínimo 8 caracteres " +
       "(cifrada con bcrypt, nunca se guarda en texto plano), o entrar directamente con Google, Microsoft, " +
-      "Facebook, Apple o GitHub si el proyecto tiene Clerk configurado — en ese caso, ResearchLens nunca ve " +
+      "Facebook, Apple o GitHub si el proyecto tiene Clerk configurado — en ese caso, Zetia nunca ve " +
       "ni guarda la contraseña de esa cuenta externa, solo tu nombre y correo para identificarte. Al " +
       "registrarte debes aceptar los términos y condiciones y la política de privacidad.",
   },
@@ -210,7 +210,7 @@ export const helpKnowledgeBase: HelpEntry[] = [
     question: "¿Qué pasa si algo falla o entro a una página que no existe?",
     keywords: ["error", "404", "no existe", "no carga", "falla", "pantalla en blanco"],
     answer:
-      "Si entras a una URL que no existe, ResearchLens muestra una página 404 en vez de un error en " +
+      "Si entras a una URL que no existe, Zetia muestra una página 404 en vez de un error en " +
       "blanco. Si una pantalla tarda en responder (por ejemplo mientras verifica tu sesión), se muestra un " +
       "indicador de carga en vez de quedarse congelada.",
   },
@@ -222,7 +222,7 @@ export const helpKnowledgeBase: HelpEntry[] = [
     question: "Hola",
     keywords: ["hola", "buenas", "buenos dias", "buenas tardes", "buenas noches", "hey", "que tal", "saludos"],
     answer:
-      "¡Hola! Soy el asistente de ResearchLens. Puedo explicarte cómo funciona el sistema, mostrarte una " +
+      "¡Hola! Soy el asistente de Zetia. Puedo explicarte cómo funciona el sistema, mostrarte una " +
       "demo completa paso a paso, o responder preguntas sobre los artículos que ya encontramos para tu " +
       "idea. ¿En qué te ayudo?",
   },
@@ -232,20 +232,20 @@ export const helpKnowledgeBase: HelpEntry[] = [
     keywords: ["como estas", "que tal estas", "como te va", "como andas", "todo bien"],
     answer:
       "Todo bien, gracias por preguntar. Soy un asistente sin sentimientos, pero con toda la información " +
-      "de ResearchLens a la mano. ¿Qué necesitas saber?",
+      "de Zetia a la mano. ¿Qué necesitas saber?",
   },
   {
     id: "gracias",
     question: "Gracias",
     keywords: ["gracias", "muchas gracias", "te agradezco", "genial gracias", "perfecto gracias"],
-    answer: "De nada. Si tienes otra pregunta sobre ResearchLens o sobre tu búsqueda, aquí estoy.",
+    answer: "De nada. Si tienes otra pregunta sobre Zetia o sobre tu búsqueda, aquí estoy.",
   },
   {
     id: "quien-eres",
     question: "¿Quién eres?",
     keywords: ["quien eres", "eres una ia", "eres un bot", "eres humano", "que eres", "eres real"],
     answer:
-      "Soy el asistente de ResearchLens. Para preguntas sobre cómo funciona el sistema respondo con " +
+      "Soy el asistente de Zetia. Para preguntas sobre cómo funciona el sistema respondo con " +
       "información fija, sin usar ningún modelo de IA. Para preguntas sobre los artículos que ya " +
       "encontramos en tu búsqueda actual, sí uso un modelo de IA (Qwen), citando siempre las fuentes " +
       "reales.",
@@ -254,7 +254,7 @@ export const helpKnowledgeBase: HelpEntry[] = [
     id: "despedida",
     question: "Adiós",
     keywords: ["adios", "chao", "nos vemos", "hasta luego", "bye", "me voy"],
-    answer: "¡Hasta luego! Vuelve cuando quieras si tienes otra pregunta sobre ResearchLens.",
+    answer: "¡Hasta luego! Vuelve cuando quieras si tienes otra pregunta sobre Zetia.",
   },
 ];
 
@@ -267,10 +267,10 @@ export const helpSuggestedQuestions: string[] = [
 ];
 
 export const helpWelcomeText =
-  "Hola, soy el asistente de ayuda de ResearchLens. No uso ningún modelo de IA para responderte — busco " +
+  "Hola, soy el asistente de ayuda de Zetia. No uso ningún modelo de IA para responderte — busco " +
   "en información real y fija sobre cómo funciona el sistema, así que siempre respondo al instante y sin " +
   "costo. Pregúntame cómo funciona cualquier parte de la app, o pídeme una demo completa.";
 
 export const helpFallbackText =
-  "No tengo una respuesta clara para eso en mi información sobre ResearchLens. Prueba con otras palabras, " +
+  "No tengo una respuesta clara para eso en mi información sobre Zetia. Prueba con otras palabras, " +
   "o pídeme 'una demo de cómo funciona todo' para ver el recorrido completo.";

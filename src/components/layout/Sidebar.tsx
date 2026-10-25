@@ -44,8 +44,7 @@ export function Sidebar() {
 
       {/* ── Header: Logo ── */}
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-border shrink-0">
-        <img src="/logo.png" alt="ResearchLens logo" className="h-8 w-8 object-contain rounded-lg shadow-sm" />
-        <span className="font-semibold text-ink-primary tracking-tight">ResearchLens</span>
+        <img src="/Zetia.png" alt="Zetia logo" className="h-10 w-10 object-contain rounded-lg shadow-sm" />
       </div>
 
       {/* ── Navigation ── */}

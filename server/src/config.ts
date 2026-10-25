@@ -53,6 +53,23 @@ export const config = {
     baseUrl: process.env.DOAJ_API_BASE_URL ?? "https://doaj.org/api",
   },
 
+  // Bases de datos editoriales. Solo se usan en la búsqueda independiente de
+  // artículos (/research/article-search), no en el análisis. Cada conector queda
+  // inactivo mientras no tenga su clave.
+  springer: {
+    apiKey: process.env.SPRINGER_API_KEY ?? "",
+  },
+
+  ieee: {
+    apiKey: process.env.IEEE_API_KEY ?? "",
+  },
+
+  scopus: {
+    apiKey: process.env.SCOPUS_API_KEY ?? "",
+    // Opcional: token institucional de Elsevier; habilita resumen y autores completos.
+    instToken: process.env.SCOPUS_INST_TOKEN ?? "",
+  },
+
   youtube: {
     apiKey: process.env.YOUTUBE_API_KEY ?? "",
   },

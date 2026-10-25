@@ -1,6 +1,6 @@
-# ResearchLens
+# Zetia
 
-**ResearchLens** convierte una idea de investigación escrita en lenguaje natural en un diagnóstico
+**Zetia** convierte una idea de investigación escrita en lenguaje natural en un diagnóstico
 fundamentado: busca literatura científica real en cuatro fuentes académicas al mismo tiempo, calcula
 qué tan parecida es tu idea a lo que ya existe, te muestra qué tan explorado está el tema y te sugiere
 posibles oportunidades de investigación — todo en una sola búsqueda, sin tener que abrir cuatro pestañas
@@ -16,7 +16,7 @@ e Informática de la **Universidad de Córdoba** (Colombia).
 
 ## Tabla de contenido
 
-1. [¿Qué puedes hacer con ResearchLens?](#qué-puedes-hacer-con-researchlens)
+1. [¿Qué puedes hacer con Zetia?](#qué-puedes-hacer-con-zetia)
 2. [¿Cómo funciona por dentro?](#cómo-funciona-por-dentro)
 3. [Tecnologías utilizadas](#tecnologías-utilizadas)
 4. [Estructura del proyecto](#estructura-del-proyecto)
@@ -33,10 +33,10 @@ e Informática de la **Universidad de Córdoba** (Colombia).
 
 ---
 
-## ¿Qué puedes hacer con ResearchLens?
+## ¿Qué puedes hacer con Zetia?
 
 - **Escribir tu idea con tus propias palabras.** No necesitas saber redactar una pregunta de
-  investigación formal; ResearchLens la interpreta y la convierte en términos de búsqueda efectivos.
+  investigación formal; Zetia la interpreta y la convierte en términos de búsqueda efectivos.
 - **Ver un diagnóstico de qué tan explorado está tu tema**: bajo, moderado o alto, con una explicación
   en español y una tendencia (creciente, estable o decreciente) basada en publicaciones reales por año.
 - **Explorar literatura real** recuperada de cuatro fuentes académicas a la vez: **OpenAlex**,
@@ -102,7 +102,7 @@ flowchart TD
 Algunos detalles importantes de cómo está construido esto:
 
 - **Ninguna fuente puede tumbar el análisis.** Si una fuente falla (por ejemplo, Semantic Scholar
-  responde "demasiadas solicitudes"), ResearchLens espera lo necesario y reintenta con pausas cada vez
+  responde "demasiadas solicitudes"), Zetia espera lo necesario y reintenta con pausas cada vez
   más largas; si aun así no responde, el resto del análisis continúa igual con las fuentes que sí
   funcionaron, y te lo indica en el panel de "Fuentes consultadas".
 - **La similitud es matemática, no una opinión.** Se convierte tu idea y cada resumen de artículo en
@@ -240,7 +240,7 @@ configurar dos servidores por separado, ni preocuparte por versiones.
    La primera vez tarda unos minutos porque descarga e instala todo. Cuando termine, verás mensajes de
    que el servidor está listo.
 5. **Abre tu navegador** en [http://localhost:8080](http://localhost:8080). Ya puedes crear tu cuenta y
-   usar ResearchLens.
+   usar Zetia.
 6. Para apagarlo, vuelve a la terminal y presiona `Ctrl + C`, o corre `docker compose down` desde otra
    terminal en la misma carpeta.
 
@@ -272,7 +272,7 @@ vez), ideal si vas a modificar el código.
    El backend queda escuchando en `http://localhost:8787` y Vite te va a mostrar la URL del frontend,
    normalmente `http://localhost:5173`. Si alguna vez necesitas correrlos por separado (por ejemplo para
    ver los logs de uno solo sin ruido del otro), puedes usar `npm run dev:client` o `npm run dev:server`.
-7. **Abre esa URL en tu navegador.** Ya puedes crear tu cuenta y usar ResearchLens.
+7. **Abre esa URL en tu navegador.** Ya puedes crear tu cuenta y usar Zetia.
 8. Para apagarlo, presiona `Ctrl + C` en la terminal (corta ambos procesos a la vez).
 
 ---
@@ -282,7 +282,7 @@ vez), ideal si vas a modificar el código.
 Toda la configuración vive en un archivo `.env` que tú mismo creas en la raíz del proyecto, junto a
 `package.json` (nunca lo subas a un repositorio público — ya está excluido en `.gitignore`). Cada línea
 del archivo tiene la forma `NOMBRE_DE_LA_VARIABLE=valor`. Estas son todas las variables que reconoce
-ResearchLens:
+Zetia:
 
 | Variable | Obligatoria | Para qué sirve | Dónde conseguirla |
 |---|---|---|---|
@@ -294,6 +294,10 @@ ResearchLens:
 | `OPENALEX_API_KEY` | No | Clave opcional de OpenAlex | [openalex.org](https://openalex.org/) |
 | `CROSSREF_MAILTO` | Recomendada | Correo de contacto para Crossref | Tu propio correo |
 | `SEMANTIC_SCHOLAR_API_KEY` | No | Sin ella funciona, pero con un límite de tasa más estricto | [semanticscholar.org/product/api](https://www.semanticscholar.org/product/api) |
+| `SPRINGER_API_KEY` | No | Activa Springer Nature en la búsqueda independiente de artículos (no se usa en el análisis) | [dev.springernature.com](https://dev.springernature.com/) |
+| `IEEE_API_KEY` | No | Activa IEEE Xplore en la búsqueda independiente de artículos (no se usa en el análisis) | [developer.ieee.org](https://developer.ieee.org/) |
+| `SCOPUS_API_KEY` | No | Activa Scopus en la búsqueda independiente de artículos (no se usa en el análisis) | [dev.elsevier.com](https://dev.elsevier.com/) |
+| `SCOPUS_INST_TOKEN` | No | Token institucional de Elsevier; con él Scopus devuelve resumen y lista completa de autores | Lo solicita la biblioteca de tu institución a Elsevier |
 | `YOUTUBE_API_KEY` | No | Sin ella, la sección de videos relacionados no funciona | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials) (habilita "YouTube Data API v3") |
 | `VITE_CLERK_PUBLISHABLE_KEY` | No | Habilita los botones "Continuar con Google/Microsoft/Facebook/Apple/GitHub". Sin ella, esos botones simplemente no aparecen y el login con correo/contraseña sigue funcionando igual | [dashboard.clerk.com](https://dashboard.clerk.com/) → tu app → "API Keys" |
 | `CLERK_SECRET_KEY` | No (obligatoria solo si usas `VITE_CLERK_PUBLISHABLE_KEY`) | El backend la usa para verificar la sesión de Clerk antes de crear/vincular tu cuenta en Postgres | [dashboard.clerk.com](https://dashboard.clerk.com/) → tu app → "API Keys" |
@@ -314,7 +318,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 ## Guía de uso paso a paso
 
-1. **Entra al sitio** y en la pantalla de bienvenida da clic en "Entrar a ResearchLens".
+1. **Entra al sitio** y en la pantalla de bienvenida da clic en "Entrar a Zetia".
 2. **Crea tu cuenta** (nombre, apellido, correo y contraseña de mínimo 8 caracteres), acepta los
    **términos y condiciones y la política de privacidad** (checkbox obligatorio) y da clic en "Crear
    cuenta y continuar" — o, si ya tienes una, cambia a la pestaña "Iniciar sesión". Si el proyecto tiene
@@ -324,7 +328,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 4. **Escribe tu idea de investigación** con tus propias palabras (mínimo 15 caracteres) y qué quieres
    lograr con ella. Opcionalmente puedes abrir "Detalles opcionales" y agregar área, población, contexto
    o variable.
-5. Da clic en **"Analizar idea"** y espera unos segundos mientras ResearchLens hace todo el proceso
+5. Da clic en **"Analizar idea"** y espera unos segundos mientras Zetia hace todo el proceso
    descrito en [¿Cómo funciona por dentro?](#cómo-funciona-por-dentro).
 6. Verás tu **diagnóstico**: qué tan explorado está el tema, similitud promedio con la literatura
    encontrada y la tendencia de publicaciones.
@@ -360,7 +364,7 @@ todos los días a medianoche (UTC) y puedes ver cuántos te quedan en la secció
 - Lo único que el navegador guarda es tu **sesión (token JWT)**, en el almacenamiento local del
   navegador.
 - Las **contraseñas se guardan cifradas** (bcrypt), nunca en texto plano. Si entras con Google,
-  Microsoft, Facebook, Apple o GitHub, ese paso lo resuelve **Clerk**: ResearchLens nunca ve ni guarda la
+  Microsoft, Facebook, Apple o GitHub, ese paso lo resuelve **Clerk**: Zetia nunca ve ni guarda la
   contraseña de esa cuenta externa, solo tu nombre y correo para identificarte.
 - El servidor **limita cuántos intentos de login/registro** puede hacer una misma IP en pocos minutos
   ([express-rate-limit](https://www.npmjs.com/package/express-rate-limit)), para dificultar ataques de
@@ -370,7 +374,7 @@ todos los días a medianoche (UTC) y puedes ver cuántos te quedan en la secció
 - Toda cuenta nueva debe **aceptar explícitamente los términos y condiciones y la política de
   privacidad** (checkbox obligatorio en el registro) antes de poder crear la cuenta.
 - Cada usuario solo puede ver y modificar **sus propios** proyectos, búsquedas y mensajes.
-- Si escribes una URL que no existe, ResearchLens muestra una **página 404** en vez de un error en blanco,
+- Si escribes una URL que no existe, Zetia muestra una **página 404** en vez de un error en blanco,
   y las pantallas muestran un indicador de carga mientras esperan una respuesta lenta del servidor.
 
 ---
