@@ -9,6 +9,7 @@ import { PageLoader } from "@/components/ui/PageLoader";
 import { isClerkEnabled } from "@/lib/clerkConfig";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { Welcome } from "@/pages/Welcome";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 
 const Home = lazy(() => import("@/pages/Home").then((m) => ({ default: m.Home })));
 const Idea = lazy(() => import("@/pages/Idea").then((m) => ({ default: m.Idea })));
@@ -35,6 +36,7 @@ export default function App() {
         <ResearchProvider>
           <ProjectsProvider>
             <BrowserRouter>
+            <OfflineBanner />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Welcome />} />

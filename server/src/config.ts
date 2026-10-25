@@ -18,6 +18,13 @@ function required(name: string): string {
 export const config = {
   port: Number(process.env.PORT ?? 8787),
 
+  // Orígenes del navegador autorizados a llamar a la API (separados por coma). En Vercel el frontend
+  // y la API comparten dominio, así que CORS solo hace falta para desarrollo local.
+  corsOrigins: (process.env.CORS_ORIGINS ?? "https://zetia.tech,https://www.zetia.tech,http://localhost:5173,http://localhost:5174,http://localhost:5175")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+
   // Qwen (Alibaba Cloud DashScope, modo compatible con OpenAI).
   // qwen3.7-flash es un modelo "híbrido" con razonamiento (chain-of-thought)
   // activado por defecto, que puede gastar cientos de tokens de "thinking"

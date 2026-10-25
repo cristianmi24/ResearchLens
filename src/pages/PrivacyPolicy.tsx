@@ -10,7 +10,7 @@ export function PrivacyPolicy() {
     <div className="min-h-dvh bg-[var(--color-surface)] px-4 py-10 animate-fade-in">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center gap-2.5">
-          <img src="/Zetia.png" alt="Zetia logo" className="h-10 w-10 object-contain rounded-lg shadow-xs" />
+          <img src="/logos/zetia-icon.webp" alt="Zetia logo" className="h-10 w-10 object-contain rounded-lg shadow-xs" />
         </div>
 
         <div>

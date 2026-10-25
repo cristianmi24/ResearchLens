@@ -1,13 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, ChevronDown, SlidersHorizontal } from "lucide-react";
+import { ArrowRight, ChevronDown, Save, SlidersHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FieldLabel } from "@/components/ui/FieldHelp";
 import type { AcademicLevel, ResearchArea, ResearchIdeaInput as ResearchIdeaInputType } from "@/types/research";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const MAX_CHARS = 600;
+
+// Borrador local: si el usuario recarga, cierra la pestaña o pierde la red, lo escrito no se pierde.
+const DRAFT_KEY = "zetia.ideaDraft";
+
+interface IdeaDraft {
+  rawText: string;
+  area: ResearchArea;
+  population: string;
+  context: string;
+  intervention: string;
+  objective: string;
+  academicLevel: AcademicLevel;
+}
+
+function readDraft(): Partial<IdeaDraft> {
+  try {
+    return JSON.parse(localStorage.getItem(DRAFT_KEY) ?? "{}") as Partial<IdeaDraft>;
+  } catch {
+    return {};
+  }
+}
 
 const fieldClass =
   "w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink-primary placeholder:text-ink-muted transition-shadow focus:outline-none focus:border-brand-300 focus:ring-4 focus:ring-brand-100";
@@ -19,14 +40,45 @@ interface ResearchIdeaInputProps {
 
 export function ResearchIdeaInput({ onSubmit, isSubmitting }: ResearchIdeaInputProps) {
   const { language, t } = useLanguage();
-  const [rawText, setRawText] = useState("");
-  const [area, setArea] = useState<ResearchArea>("educacion");
-  const [population, setPopulation] = useState("");
-  const [context, setContext] = useState("");
-  const [intervention, setIntervention] = useState("");
-  const [objective, setObjective] = useState("");
-  const [academicLevel, setAcademicLevel] = useState<AcademicLevel>("pregrado");
-  const [showOptional, setShowOptional] = useState(false);
+  const [draft] = useState(readDraft);
+  const [rawText, setRawText] = useState(draft.rawText ?? "");
+  const [area, setArea] = useState<ResearchArea>(draft.area ?? "educacion");
+  const [population, setPopulation] = useState(draft.population ?? "");
+  const [context, setContext] = useState(draft.context ?? "");
+  const [intervention, setIntervention] = useState(draft.intervention ?? "");
+  const [objective, setObjective] = useState(draft.objective ?? "");
+  const [academicLevel, setAcademicLevel] = useState<AcademicLevel>(draft.academicLevel ?? "pregrado");
+  const [showOptional, setShowOptional] = useState(Boolean(draft.population || draft.context || draft.intervention));
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+
+  const hasContent = [rawText, objective, population, context, intervention].some((v) => v.trim().length > 0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        if (hasContent) {
+          const value: IdeaDraft = { rawText, area, population, context, intervention, objective, academicLevel };
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(value));
+        } else {
+          localStorage.removeItem(DRAFT_KEY);
+        }
+      } catch {
+        // Almacenamiento lleno o bloqueado (modo privado): el formulario sigue funcionando sin borrador.
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [hasContent, rawText, area, population, context, intervention, objective, academicLevel]);
+
+  function discardDraft() {
+    setRawText("");
+    setObjective("");
+    setPopulation("");
+    setContext("");
+    setIntervention("");
+    setArea("educacion");
+    setAcademicLevel("pregrado");
+    setConfirmDiscard(false);
+  }
 
   // Las opciones se generan dinámicamente para reflejar el idioma actual
   const areaOptions: { value: ResearchArea; label: string }[] = [
@@ -200,14 +252,44 @@ export function ResearchIdeaInput({ onSubmit, isSubmitting }: ResearchIdeaInputP
         </AnimatePresence>
       </motion.div>
 
-      {/* Botón submit */}
-      <motion.div variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
+      {/* Botón submit + estado del borrador */}
+      <motion.div
+        variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      >
         <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} className="inline-block w-full sm:w-auto">
           <Button type="submit" size="lg" disabled={!canSubmit || isSubmitting} className="w-full sm:w-auto">
             {isSubmitting ? t("idea.field.analyzing", "Analizando...") : t("idea.field.submitBtn", "Analizar idea")}
             <ArrowRight size={18} />
           </Button>
         </motion.div>
+        {hasContent && (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-ink-muted" aria-live="polite">
+            <span className="inline-flex items-center gap-1">
+              <Save size={13} aria-hidden="true" />
+              {t("idea.draft.saved", "Borrador guardado en este navegador")}
+            </span>
+            {confirmDiscard ? (
+              <>
+                <button type="button" onClick={discardDraft} className="focus-ring rounded px-2 py-1.5 font-semibold text-[var(--color-status-critical-text)] hover:underline">
+                  {t("idea.draft.confirm", "Sí, descartar")}
+                </button>
+                <button type="button" onClick={() => setConfirmDiscard(false)} className="focus-ring rounded px-2 py-1.5 hover:underline">
+                  {t("idea.draft.cancel", "Cancelar")}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmDiscard(true)}
+                className="focus-ring inline-flex items-center gap-1 rounded px-2 py-1.5 hover:text-ink-primary hover:underline"
+              >
+                <Trash2 size={13} aria-hidden="true" />
+                {t("idea.draft.discard", "Descartar borrador")}
+              </button>
+            )}
+          </div>
+        )}
       </motion.div>
     </motion.form>
   );

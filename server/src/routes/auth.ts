@@ -8,14 +8,21 @@ import {
   findUserById,
   linkClerkId,
 } from "../db/users.js";
-import { hashPassword, verifyPassword, signToken } from "../lib/auth.js";
+import { burnPasswordCheck, hashPassword, verifyPassword, signToken } from "../lib/auth.js";
 import { resolveClerkProfile } from "../lib/clerk.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { publicErrorMessage } from "../lib/httpErrors.js";
 
 export const authRouter = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
+// Topes de longitud: evitan cuerpos enormes y que bcrypt procese contraseñas gigantes (DoS).
+const MAX_EMAIL_LENGTH = 254;
+const MAX_PASSWORD_LENGTH = 128;
+const MAX_NAME_LENGTH = 60;
+
+const isString = (value: unknown): value is string => typeof value === "string";
 
 function publicUser(user: { id: string; email: string; firstName: string; lastName: string; createdAt: string }) {
   return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, createdAt: user.createdAt };
@@ -23,21 +30,21 @@ function publicUser(user: { id: string; email: string; firstName: string; lastNa
 
 authRouter.post("/register", async (req, res) => {
   try {
-    const { email, password, firstName, lastName } = req.body as {
-      email?: string;
-      password?: string;
-      firstName?: string;
-      lastName?: string;
-    };
+    const { email, password, firstName, lastName } = (req.body ?? {}) as Record<string, unknown>;
 
-    if (!email || !EMAIL_RE.test(email)) {
+    if (!isString(email) || email.length > MAX_EMAIL_LENGTH || !EMAIL_RE.test(email.trim())) {
       return res.status(400).json({ error: "Correo inválido" });
     }
-    if (!password || password.length < MIN_PASSWORD_LENGTH) {
-      return res.status(400).json({ error: `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres` });
+    if (!isString(password) || password.length < MIN_PASSWORD_LENGTH || password.length > MAX_PASSWORD_LENGTH) {
+      return res
+        .status(400)
+        .json({ error: `La contraseña debe tener entre ${MIN_PASSWORD_LENGTH} y ${MAX_PASSWORD_LENGTH} caracteres` });
     }
-    if (!firstName?.trim() || !lastName?.trim()) {
+    if (!isString(firstName) || !isString(lastName) || !firstName.trim() || !lastName.trim()) {
       return res.status(400).json({ error: "Nombre y apellido son requeridos" });
+    }
+    if (firstName.length > MAX_NAME_LENGTH || lastName.length > MAX_NAME_LENGTH) {
+      return res.status(400).json({ error: `Nombre y apellido admiten hasta ${MAX_NAME_LENGTH} caracteres` });
     }
 
     const existing = await findUserByEmail(email);
@@ -52,19 +59,26 @@ authRouter.post("/register", async (req, res) => {
     res.status(201).json({ token, user: publicUser(user) });
   } catch (err) {
     console.error("[POST /auth/register]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
 authRouter.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body as { email?: string; password?: string };
-    if (!email || !password) {
+    const { email, password } = (req.body ?? {}) as Record<string, unknown>;
+    if (!isString(email) || !isString(password) || !email || !password) {
       return res.status(400).json({ error: "Correo y contraseña son requeridos" });
+    }
+    if (email.length > MAX_EMAIL_LENGTH || password.length > MAX_PASSWORD_LENGTH) {
+      return res.status(401).json({ error: "Correo o contraseña incorrectos" });
     }
 
     const user = await findUserByEmail(email);
-    if (!user || !user.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
+    if (!user || !user.passwordHash) {
+      await burnPasswordCheck(password);
+      return res.status(401).json({ error: "Correo o contraseña incorrectos" });
+    }
+    if (!(await verifyPassword(password, user.passwordHash))) {
       return res.status(401).json({ error: "Correo o contraseña incorrectos" });
     }
 
@@ -72,14 +86,14 @@ authRouter.post("/login", async (req, res) => {
     res.json({ token, user: publicUser(user) });
   } catch (err) {
     console.error("[POST /auth/login]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
 authRouter.post("/clerk-sync", async (req, res) => {
   try {
-    const { clerkToken } = req.body as { clerkToken?: string };
-    if (!clerkToken) {
+    const { clerkToken } = (req.body ?? {}) as Record<string, unknown>;
+    if (!isString(clerkToken) || !clerkToken) {
       return res.status(400).json({ error: "clerkToken es requerido" });
     }
 
@@ -105,7 +119,7 @@ authRouter.post("/clerk-sync", async (req, res) => {
     res.json({ token, user: publicUser(user) });
   } catch (err) {
     console.error("[POST /auth/clerk-sync]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -116,6 +130,6 @@ authRouter.get("/me", requireAuth, async (req, res) => {
     res.json({ user: publicUser(user) });
   } catch (err) {
     console.error("[GET /auth/me]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });

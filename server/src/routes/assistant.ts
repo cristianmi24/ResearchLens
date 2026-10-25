@@ -5,6 +5,7 @@ import { SENIOR_RESEARCHER_SYSTEM_INSTRUCTION, levelGuidance, rocas } from "../p
 import { getLatestSession } from "../db/researchSessions.js";
 import { saveMessage } from "../db/assistantMessages.js";
 import type { AssistantCitation, AssistantMessage } from "../types.js";
+import { publicErrorMessage } from "../lib/httpErrors.js";
 
 export const assistantRouter = Router();
 
@@ -98,7 +99,7 @@ Pregunta del usuario: "${question}"`,
     res.json(rest);
   } catch (err) {
     console.error("[POST /assistant/chat]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -121,6 +122,6 @@ assistantRouter.post("/messages", async (req, res) => {
     res.status(204).end();
   } catch (err) {
     console.error("[POST /assistant/messages]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });

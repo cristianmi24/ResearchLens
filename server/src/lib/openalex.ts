@@ -83,6 +83,36 @@ export async function searchWorks(searchQuery: string, perPage = 15): Promise<Op
   return { articles: data.results.map(normalize), topicIds };
 }
 
+/**
+ * Busca varios DOI en una sola petición (máx. 50) y devuelve DOI en minúsculas → artículo.
+ * Sirve para completar fuentes que traen metadatos incompletos (p. ej. Scopus sin token institucional).
+ * Ante cualquier fallo devuelve un mapa vacío en vez de lanzar.
+ */
+export async function worksByDoi(dois: string[]): Promise<Map<string, Article>> {
+  // "|" separa valores y "," separa filtros en OpenAlex: un DOI con esos caracteres rompería el filtro.
+  const unique = [...new Set(dois.map((d) => d.toLowerCase().trim()))].filter((d) => d && !/[|,]/.test(d)).slice(0, 50);
+  const found = new Map<string, Article>();
+  if (!unique.length) return found;
+  const params = commonParams();
+  params.set("filter", `doi:${unique.join("|")}`);
+  params.set("per_page", "50");
+  try {
+    const res = await fetch(`${BASE_URL}?${params.toString()}`, { signal: AbortSignal.timeout(10_000) });
+    if (!res.ok) {
+      console.error("[openalex] doi lookup failed", res.status, await res.text());
+      return found;
+    }
+    const data = (await res.json()) as { results: OpenAlexWork[] };
+    for (const work of data.results) {
+      const article = normalize(work);
+      if (article.doi) found.set(article.doi.toLowerCase(), article);
+    }
+  } catch (err) {
+    console.error("[openalex] doi lookup failed", err);
+  }
+  return found;
+}
+
 export async function countWorks(searchQuery: string): Promise<number> {
   const params = commonParams();
   params.set("search", searchQuery);

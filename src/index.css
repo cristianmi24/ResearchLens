@@ -95,6 +95,28 @@
     background-color: var(--color-surface);
     color: var(--color-ink-primary);
   }
+  /* Anillo de foco visible en todo elemento enfocable al navegar con teclado (WCAG 2.4.7). */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+  /* "Saltar al contenido": fuera de pantalla hasta que recibe foco con Tab. */
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 400;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--color-brand-700);
+    color: #fff;
+    font-weight: 600;
+    transform: translateY(-200%);
+    transition: transform 0.15s ease;
+  }
+  .skip-link:focus {
+    transform: none;
+  }
   /* Encabezados en serif académica en toda la app (papers, revistas científicas);
      el texto de cuerpo se queda en la sans accesible para no sacrificar legibilidad. */
   h1, h2, h3 {

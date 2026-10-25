@@ -2,6 +2,7 @@ import { Router } from "express";
 import { randomUUID } from "node:crypto";
 import { listProjects, getProject, upsertProject, deleteProject } from "../db/projects.js";
 import type { Project } from "../types.js";
+import { publicErrorMessage } from "../lib/httpErrors.js";
 
 export const projectsRouter = Router();
 
@@ -10,7 +11,7 @@ projectsRouter.get("/", async (req, res) => {
     res.json(await listProjects(req.userId!));
   } catch (err) {
     console.error("[GET /projects]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -21,7 +22,7 @@ projectsRouter.get("/:id", async (req, res) => {
     res.json(project);
   } catch (err) {
     console.error("[GET /projects/:id]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -52,7 +53,7 @@ projectsRouter.post("/", async (req, res) => {
     res.json(confirmed);
   } catch (err) {
     console.error("[POST /projects]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -62,6 +63,6 @@ projectsRouter.delete("/:id", async (req, res) => {
     res.status(204).end();
   } catch (err) {
     console.error("[DELETE /projects/:id]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });

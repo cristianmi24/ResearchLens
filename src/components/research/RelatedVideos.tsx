@@ -69,7 +69,7 @@ export function RelatedVideos({ query }: RelatedVideosProps) {
             <Card className="overflow-hidden hover:shadow-[var(--shadow-card-hover)] transition-shadow">
               <div className="relative aspect-video bg-surface-muted">
                 {video.thumbnailUrl && (
-                  <img src={video.thumbnailUrl} alt={video.title} className="h-full w-full object-cover" />
+                  <img src={video.thumbnailUrl} alt={video.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                 )}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors">
                   <PlayCircle

@@ -7,7 +7,7 @@ export function NotFound() {
     <div className="min-h-dvh bg-surface px-4 py-10 flex items-center justify-center">
       <div className="max-w-md w-full text-center space-y-6 animate-fade-in">
         <div className="flex items-center justify-center gap-2.5">
-          <img src="/Zetia.png" alt="Zetia logo" className="h-10 w-10 object-contain rounded-lg shadow-xs" />
+          <img src="/logos/zetia-icon.webp" alt="Zetia logo" className="h-10 w-10 object-contain rounded-lg shadow-xs" />
         </div>
 
         <div className="flex items-center justify-center">

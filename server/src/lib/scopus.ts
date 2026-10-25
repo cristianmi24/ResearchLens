@@ -1,10 +1,12 @@
 import { config } from "../config.js";
 import type { Article } from "../types.js";
+import { worksByDoi } from "./openalex.js";
 
 // Elsevier Scopus Search API. Sin SCOPUS_API_KEY el conector queda inactivo y
 // devuelve [] sin hacer la petición. La vista estándar solo trae el primer
 // autor y no incluye el resumen; con SCOPUS_INST_TOKEN (acceso institucional)
-// se pide la vista COMPLETE, que sí los incluye.
+// se pide la vista COMPLETE, que sí los incluye. Sin ese token, resumen y
+// autores se completan con OpenAlex por DOI.
 const BASE_URL = "https://api.elsevier.com/content/search/scopus";
 
 interface ScopusEntry {
@@ -40,6 +42,25 @@ function normalize(entry: ScopusEntry): Article {
   };
 }
 
+/**
+ * Sin token institucional la vista estándar no trae resumen ni todos los autores:
+ * se completan con OpenAlex buscando por DOI. Lo que Scopus sí trajo se respeta.
+ */
+async function enrichFromOpenAlex(articles: Article[]): Promise<Article[]> {
+  const byDoi = await worksByDoi(articles.map((a) => a.doi).filter(Boolean));
+  return articles.map((article) => {
+    const match = article.doi ? byDoi.get(article.doi.toLowerCase()) : undefined;
+    if (!match) return article;
+    return {
+      ...article,
+      authors: match.authors.length > article.authors.length ? match.authors : article.authors,
+      abstract: article.abstract || match.abstract,
+      mainConcepts: article.mainConcepts.length ? article.mainConcepts : match.mainConcepts,
+      countries: article.countries?.length ? article.countries : match.countries,
+    };
+  });
+}
+
 export async function searchDocuments(searchQuery: string, rows = 10): Promise<Article[]> {
   if (!config.scopus.apiKey) return [];
   // Las comillas dobles delimitan la frase en la sintaxis de Scopus; se quitan del texto del usuario.
@@ -58,7 +79,8 @@ export async function searchDocuments(searchQuery: string, rows = 10): Promise<A
     }
     const data = (await res.json()) as { "search-results"?: { entry?: ScopusEntry[] } };
     // Sin resultados, Scopus devuelve una sola entrada con `error: "Result set was empty"`.
-    return (data["search-results"]?.entry ?? []).filter((entry) => !entry.error).map(normalize);
+    const articles = (data["search-results"]?.entry ?? []).filter((entry) => !entry.error).map(normalize);
+    return config.scopus.instToken ? articles : enrichFromOpenAlex(articles);
   } catch (err) {
     console.error("[scopus] search failed", err);
     return [];

@@ -19,6 +19,7 @@ import { searchRecords as searchSpringerRecords } from "../lib/springer.js";
 import { searchArticles as searchIeeeArticles } from "../lib/ieee.js";
 import { searchDocuments as searchScopusDocuments } from "../lib/scopus.js";
 import type { RefineFormInput, ResearchIdeaInput, UsageStatus } from "../types.js";
+import { publicErrorMessage } from "../lib/httpErrors.js";
 
 export const researchRouter = Router();
 
@@ -48,7 +49,7 @@ researchRouter.post("/analyze", async (req, res) => {
     res.json(session.diagnosis);
   } catch (err) {
     console.error("[POST /research/analyze]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -60,7 +61,7 @@ researchRouter.get("/usage", async (req, res) => {
     res.json(usage);
   } catch (err) {
     console.error("[GET /research/usage]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -72,7 +73,7 @@ researchRouter.get("/sessions/:id", async (req, res) => {
     res.json(session);
   } catch (err) {
     console.error("[GET /research/sessions/:id]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -85,7 +86,7 @@ researchRouter.get("/history", async (req, res) => {
     res.json({ analyses: summaries, activityByDay: byDay });
   } catch (err) {
     console.error("[GET /research/history]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -119,7 +120,7 @@ researchRouter.get("/article-search", async (req, res) => {
     res.json(allPapers);
   } catch (err) {
     console.error("[GET /research/article-search]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -133,7 +134,7 @@ researchRouter.post("/search", async (req, res) => {
     res.json(session.articles);
   } catch (err) {
     console.error("[POST /research/search]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -181,7 +182,7 @@ researchRouter.post("/refine", async (req, res) => {
     res.json(proposals);
   } catch (err) {
     console.error("[POST /research/refine]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -210,7 +211,7 @@ researchRouter.get("/geo-works", async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("[GET /research/geo-works]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
 
@@ -231,6 +232,6 @@ researchRouter.get("/youtube", async (req, res) => {
     res.json(videos);
   } catch (err) {
     console.error("[GET /research/youtube]", err);
-    res.status(502).json({ error: (err as Error).message });
+    res.status(502).json({ error: publicErrorMessage(err) });
   }
 });
