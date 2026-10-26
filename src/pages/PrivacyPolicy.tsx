@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, Lock, Eye, Database, Share2 } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Lock, Eye, Database, Share2, LogIn } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -112,13 +112,30 @@ export function PrivacyPolicy() {
           </CardHeader>
         </Card>
 
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          {t("privacy.back", "Volver")}
-        </Link>
+        <Card className="border border-border bg-white shadow-card">
+          <CardHeader className="flex flex-row items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+              <LogIn size={18} />
+            </div>
+            <div className="min-w-0">
+              <CardTitle>{t("privacy.card6.title", "Si inicias sesión con Google")}</CardTitle>
+              <CardDescription className="mt-1 leading-relaxed">{t("privacy.card6.desc")}</CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link
+            to="/"
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            {t("privacy.back", "Volver")}
+          </Link>
+          <Link to="/terminos" className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-600 hover:underline">
+            {t("privacy.termsLink", "Ver las condiciones del servicio")}
+          </Link>
+        </div>
       </div>
     </div>
   );

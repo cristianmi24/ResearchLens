@@ -1011,8 +1011,14 @@
   width: auto;
   flex: none;
 }
-.zetia-landing .footer-privacy {
+.zetia-landing .footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  column-gap: 16px;
   justify-self: end;
+}
+.zetia-landing .footer-privacy {
   padding: 12px 4px;
   color: var(--text-2);
 }

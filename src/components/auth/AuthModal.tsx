@@ -263,8 +263,12 @@ export function AuthModal({ open, initialMode, onClose }: AuthModalProps) {
                     <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} required />
                     <span>
                       {t("auth.modal.terms")}{" "}
+                      <Link to="/terminos" target="_blank" rel="noopener noreferrer">
+                        {t("auth.modal.termsOfService")}
+                      </Link>
+                      {t("auth.modal.andThe")}
                       <Link to="/privacidad" target="_blank" rel="noopener noreferrer">
-                        {t("auth.modal.termsLink")}
+                        {t("auth.modal.privacyLink")}
                       </Link>
                       .
                     </span>

@@ -25,6 +25,7 @@ const ProjectDetail = lazy(() => import("@/pages/ProjectDetail").then((m) => ({ 
 const History = lazy(() => import("@/pages/History").then((m) => ({ default: m.History })));
 const Evaluate = lazy(() => import("@/pages/Evaluate").then((m) => ({ default: m.Evaluate })));
 const Settings = lazy(() => import("@/pages/Settings").then((m) => ({ default: m.Settings })));
+const TermsOfService = lazy(() => import("@/pages/TermsOfService").then((m) => ({ default: m.TermsOfService })));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy").then((m) => ({ default: m.PrivacyPolicy })));
 const NotFound = lazy(() => import("@/pages/NotFound").then((m) => ({ default: m.NotFound })));
 const SsoCallback = lazy(() => import("@/pages/SsoCallback").then((m) => ({ default: m.SsoCallback })));
@@ -42,6 +43,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Welcome />} />
                 <Route path="/privacidad" element={<PrivacyPolicy />} />
+                <Route path="/terminos" element={<TermsOfService />} />
                 {isClerkEnabled && (
                   <>
                     <Route path="/sso-callback" element={<SsoCallback />} />

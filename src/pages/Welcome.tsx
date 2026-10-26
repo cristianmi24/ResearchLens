@@ -239,9 +239,14 @@ export function Welcome() {
             <ChevronRight size={20} />
           </button>
         </div>
-        <Link to="/privacidad" className="footer-privacy">
-          {t("welcome.footer.privacy")}
-        </Link>
+        <div className="footer-legal">
+          <Link to="/terminos" className="footer-privacy">
+            {t("welcome.footer.terms")}
+          </Link>
+          <Link to="/privacidad" className="footer-privacy">
+            {t("welcome.footer.privacy")}
+          </Link>
+        </div>
       </footer>
 
       <AuthModal key={modalKey} open={isModalOpen} initialMode={authMode} onClose={closeModal} />
