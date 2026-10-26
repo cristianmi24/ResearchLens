@@ -7,6 +7,11 @@ import { ApiError } from "@/services/api";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { CONTACT_EMAIL } from "@/lib/contact";
 
+interface SyncError {
+  message: string;
+  code: string;
+}
+
 /**
  * Puente entre la sesión de Clerk (ya resuelta tras el redirect de OAuth) y
  * nuestro backend: intercambia el token de Clerk por el JWT propio y lo
@@ -17,12 +22,14 @@ export function SsoSync() {
   const navigate = useNavigate();
   const { isLoaded, isSignedIn, getToken, signOut } = useClerkSession();
   const { setSession } = useAuth();
-  const [error, setError] = useState<{ message: string; code: string } | null>(null);
-  const attempted = useRef(false);
+  const [error, setError] = useState<SyncError | null>(null);
+  // Cada intento tiene un número; el efecto solo corre una vez por intento (también bajo StrictMode).
+  const [attempt, setAttempt] = useState(0);
+  const startedAttempt = useRef(-1);
 
   useEffect(() => {
-    if (!isLoaded || attempted.current) return;
-    attempted.current = true;
+    if (!isLoaded || startedAttempt.current === attempt) return;
+    startedAttempt.current = attempt;
 
     if (!isSignedIn) {
       navigate("/", { replace: true });
@@ -37,10 +44,9 @@ export function SsoSync() {
         setSession(token, user);
         navigate("/inicio", { replace: true });
       } catch (err) {
-        // Si la sincronización con el backend falla, Clerk queda "logueado" pero Zetia nunca
-        // llegó a crear la sesión: sin cerrar Clerk aquí, cualquier botón social posterior fallaría de
-        // inmediato con "You're already signed in", dejando al usuario sin forma de reintentar.
-        await signOut().catch(() => {});
+        // IMPORTANTE: aquí NO se cierra la sesión de Clerk. signOut() navega a otra página al terminar, y eso
+        // recargaba la app antes de que el usuario alcanzara a leer el error. La sesión se cierra solo cuando
+        // el usuario elige salir (botón de abajo); si pulsa "Intentar de nuevo" se reutiliza.
         console.error("[SsoSync] falló el inicio de sesión con Google:", err);
         if (err instanceof ApiError) {
           // El servidor manda un código por cada motivo; sin él (p. ej. un 5xx sin cuerpo) se usa el estado HTTP.
@@ -52,7 +58,18 @@ export function SsoSync() {
         }
       }
     })();
-  }, [isLoaded, isSignedIn, getToken, signOut, setSession, navigate]);
+  }, [isLoaded, isSignedIn, getToken, setSession, navigate, attempt]);
+
+  function retry() {
+    setError(null);
+    setAttempt((n) => n + 1);
+  }
+
+  function leave() {
+    // Cierra la sesión de Clerk (para que un nuevo intento con Google no falle con "ya has iniciado sesión")
+    // y vuelve al inicio. Si el cierre falla, igual se sale de esta pantalla.
+    signOut({ redirectUrl: "/" }).catch(() => window.location.assign("/"));
+  }
 
   if (error) {
     return (
@@ -68,9 +85,18 @@ export function SsoSync() {
           y cuéntanos este código:
         </p>
         <code className="rounded-lg bg-surface-muted px-3 py-1.5 font-mono text-xs text-ink-primary select-all">{error.code}</code>
-        <a href="/" className="mt-2 text-sm font-medium text-brand-600 hover:underline">
-          Volver al inicio
-        </a>
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={retry}
+            className="min-h-11 rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white hover:bg-brand-700 focus-ring"
+          >
+            Intentar de nuevo
+          </button>
+          <button type="button" onClick={leave} className="min-h-11 text-sm font-medium text-brand-600 hover:underline focus-ring rounded-lg">
+            Volver al inicio
+          </button>
+        </div>
       </div>
     );
   }

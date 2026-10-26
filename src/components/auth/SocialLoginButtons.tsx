@@ -40,11 +40,15 @@ export function SocialLoginButtons() {
     setPendingStrategy(strategy);
     try {
       // Una sesión de Clerk puede quedar activa de un intento anterior sin pasar por nuestro logout ni
-      // por sso-sync (ej. se cerró la pestaña a mitad del flujo, se refrescó la página, expiró el JWT
-      // propio sin que ninguna llamada a la API disparara un 401): eso basta para que Clerk rechace
-      // cualquier intento nuevo con "You're already signed in". Se cierra primero sin importar el motivo
-      // — si ya estaba limpio, no hace nada.
-      await clerk.signOut().catch(() => {});
+      // por sso-sync (ej. se cerró la pestaña a mitad del flujo, falló la sincronización con el servidor,
+      // expiró el JWT propio sin que ninguna llamada a la API disparara un 401): Clerk rechaza cualquier
+      // intento nuevo con "You're already signed in". En vez de cerrarla (signOut() navega a otra página y
+      // cancelaba este clic), se aprovecha: ya hay una cuenta de Google validada, solo falta intercambiarla
+      // por nuestra sesión en /sso-sync (que, si la sesión de Clerk está vencida, vuelve al inicio).
+      if (clerk.session) {
+        window.location.assign("/sso-sync");
+        return;
+      }
       await signIn.authenticateWithRedirect({
         strategy,
         redirectUrl: `${window.location.origin}/sso-callback`,
