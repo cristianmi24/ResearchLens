@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, Lock, Eye, Database, Share2, LogIn } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Lock, Eye, Database, Share2, LogIn, Mail } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { CONTACT_EMAIL } from "@/lib/contact";
 
 export function PrivacyPolicy() {
   const { t } = useLanguage();
@@ -120,6 +121,24 @@ export function PrivacyPolicy() {
             <div className="min-w-0">
               <CardTitle>{t("privacy.card6.title", "Si inicias sesión con Google")}</CardTitle>
               <CardDescription className="mt-1 leading-relaxed">{t("privacy.card6.desc")}</CardDescription>
+            </div>
+          </CardHeader>
+        </Card>
+
+        <Card className="border border-border bg-white shadow-card">
+          <CardHeader className="flex flex-row items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+              <Mail size={18} />
+            </div>
+            <div className="min-w-0">
+              <CardTitle>{t("privacy.card7.title", "Contacto y quejas")}</CardTitle>
+              <CardDescription className="mt-1 leading-relaxed">{t("privacy.card7.desc")}</CardDescription>
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="mt-2 inline-flex min-h-11 items-center break-all text-sm font-semibold text-brand-600 hover:underline"
+              >
+                {CONTACT_EMAIL}
+              </a>
             </div>
           </CardHeader>
         </Card>

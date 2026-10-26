@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, BookOpenCheck, Cpu, Database, FileText, Gauge, Scale, ShieldCheck, UserCheck, UserCog } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, Cpu, Database, FileText, Gauge, Mail, Scale, ShieldCheck, UserCheck, UserCog } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { CONTACT_EMAIL } from "@/lib/contact";
 
 // Cada sección se escribe en las traducciones (terms.sN.title / terms.sN.desc); aquí solo se ordena y se le da un ícono y color.
 const SECTIONS: { n: number; icon: LucideIcon; tone: string }[] = [
@@ -15,6 +16,7 @@ const SECTIONS: { n: number; icon: LucideIcon; tone: string }[] = [
   { n: 7, icon: Gauge, tone: "bg-pastel-peach text-pastel-peach-ink" },
   { n: 8, icon: Scale, tone: "bg-pastel-sky text-pastel-sky-ink" },
   { n: 9, icon: UserCog, tone: "bg-pastel-lavender text-pastel-lavender-ink" },
+  { n: 10, icon: Mail, tone: "bg-pastel-mint text-pastel-mint-ink" },
 ];
 
 /** Condiciones del servicio: página pública (sin sesión), enlazada desde el registro, el inicio y la privacidad. */
@@ -47,6 +49,14 @@ export function TermsOfService() {
                   {n}. {t(`terms.s${n}.title`)}
                 </CardTitle>
                 <CardDescription className="mt-1 leading-relaxed">{t(`terms.s${n}.desc`)}</CardDescription>
+                {n === 10 && (
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="mt-2 inline-flex min-h-11 items-center break-all text-sm font-semibold text-brand-600 hover:underline focus-ring rounded-lg"
+                  >
+                    {CONTACT_EMAIL}
+                  </a>
+                )}
               </div>
             </CardHeader>
           </Card>
