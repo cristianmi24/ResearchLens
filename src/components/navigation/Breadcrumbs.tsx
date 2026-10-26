@@ -14,7 +14,7 @@ const crumbs: Record<string, [TranslationKey | string, string, string?]> = {
   "/opportunities": ["breadcrumb.opportunities", "Oportunidades", "/results"],
   "/refine": ["breadcrumb.refine", "Refinar pregunta", "/opportunities"],
   "/article-search": ["nav.search", "Buscar literatura", "/inicio"],
-  "/unicordoba": ["nav.unicordoba", "Unicórdoba", "/inicio"],
+  "/unicordoba": ["nav.search", "Buscar literatura", "/inicio"],
   "/projects": ["nav.projects", "Mis proyectos", "/inicio"],
   "/history": ["nav.history", "Mi historial", "/inicio"],
   "/settings": ["nav.settings", "Configuración", "/inicio"],

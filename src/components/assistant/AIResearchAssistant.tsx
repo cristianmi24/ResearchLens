@@ -105,13 +105,14 @@ export function AIResearchAssistant() {
       <button
         type="button"
         onClick={() => setOpen(true)}
+        aria-label={t("assistant.button", "Preguntar al asistente")}
+        title={t("assistant.button", "Preguntar al asistente")}
         className={cn(
-          "fixed bottom-5 right-5 z-40 inline-flex items-center gap-2.5 rounded-full bg-brand-600 text-white pl-2.5 pr-4 py-2 text-sm font-medium shadow-lg hover:bg-brand-700 transition-colors focus-ring",
+          "fixed bottom-5 right-5 z-40 inline-flex h-20 w-20 items-center justify-center rounded-full bg-transparent p-0 text-white drop-shadow-lg transition-transform hover:scale-105 focus-ring",
           open && "hidden"
         )}
       >
-        <img src="/logos/zetia-icon.webp" alt="Zetia" className="h-6 w-6 object-contain rounded-full bg-white/20 p-0.5" />
-        {t("assistant.button", "Preguntar al asistente")}
+        <img src="/mascota.png" alt="" className="h-20 w-20 object-contain" />
       </button>
 
       {open && (
@@ -132,7 +133,7 @@ export function AIResearchAssistant() {
               />
               <div className="flex items-center justify-between px-5 h-16">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <img src="/logos/zetia-icon.webp" alt="Asistente de Zetia" loading="lazy" className="h-9 w-9 shrink-0 object-contain rounded-full bg-brand-50 p-0.5 shadow-sm" />
+                  <img src="/mascota.png" alt="Asistente de Zetia" loading="lazy" className="h-14 w-14 shrink-0 object-contain" />
                   <div className="min-w-0">
                     <p className="font-serif font-semibold text-ink-primary leading-tight truncate">
                       {t("assistant.title", "Asistente de investigación")}

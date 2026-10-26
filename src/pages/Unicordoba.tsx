@@ -8,7 +8,7 @@ import {
   sourcesFor,
   type MultiSourceResult,
   type PanelDocument,
-  type SourceChoice,
+  type PanelSourceId,
   type UnicordobaSearchResult,
 } from "@/services/unicordobaApi";
 import { SourcePicker } from "@/components/unicordoba/SourcePicker";
@@ -23,14 +23,14 @@ const inputClass =
   "mt-1.5 h-11 w-full rounded-lg border border-border bg-white px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
 
 interface Submitted {
-  source: SourceChoice;
+  sources: PanelSourceId[];
   q: string;
   years: number;
   size: number;
   page: number;
 }
 
-const INITIAL: Submitted = { source: "unicordoba", q: "", years: 5, size: 20, page: 0 };
+const INITIAL: Submitted = { sources: ["unicordoba"], q: "", years: 5, size: 20, page: 0 };
 
 /**
  * Panel de búsqueda: el repositorio de Unicórdoba (paginado) y, a elección del usuario, IEEE Xplore,
@@ -38,7 +38,7 @@ const INITIAL: Submitted = { source: "unicordoba", q: "", years: 5, size: 20, pa
  */
 export function Unicordoba() {
   const { t } = useLanguage();
-  const [source, setSource] = useState<SourceChoice>(INITIAL.source);
+  const [sources, setSources] = useState<PanelSourceId[]>(INITIAL.sources);
   const [query, setQuery] = useState("");
   const [years, setYears] = useState(INITIAL.years);
   const [size, setSize] = useState(INITIAL.size);
@@ -49,7 +49,7 @@ export function Unicordoba() {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
 
-  const isRepository = submitted.source === "unicordoba";
+  const isRepository = submitted.sources.length === 1 && submitted.sources[0] === "unicordoba";
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +62,7 @@ export function Unicordoba() {
             setMultiResult(null);
           }
         })
-      : searchMultiSource({ q: submitted.q, sources: sourcesFor(submitted.source), size: submitted.size, years: submitted.years }).then(
+      : searchMultiSource({ q: submitted.q, sources: sourcesFor(submitted.sources), size: submitted.size, years: submitted.years }).then(
           (data) => {
             if (!cancelled) {
               setMultiResult(data);
@@ -85,27 +85,28 @@ export function Unicordoba() {
     };
   }, [submitted, isRepository, t]);
 
-  function changeSource(next: SourceChoice) {
-    setSource(next);
+  function changeSource(next: PanelSourceId[]) {
+    setSources(next);
     setError("");
     // Las bases externas devuelven pocos resultados por fuente: se ajusta el tamaño a sus opciones.
-    if (next !== "unicordoba" && !PER_SOURCE_OPTIONS.includes(size)) setSize(10);
-    if (next === "unicordoba" && !PAGE_SIZE_OPTIONS.includes(size)) setSize(20);
+    const onlyRepository = next.length === 1 && next[0] === "unicordoba";
+    if (!onlyRepository && !PER_SOURCE_OPTIONS.includes(size)) setSize(10);
+    if (onlyRepository && !PAGE_SIZE_OPTIONS.includes(size)) setSize(20);
   }
 
   function handleSearch(event: React.FormEvent) {
     event.preventDefault();
     const q = query.trim();
-    if (source !== "unicordoba" && q.length < 2) {
+    if (!(sources.length === 1 && sources[0] === "unicordoba") && q.length < 2) {
       setError(t("unicor.queryRequired", "Escribe un tema para buscar en las bases académicas."));
       return;
     }
-    setSubmitted({ source, q, years, size, page: 0 });
+    setSubmitted({ sources, q, years, size, page: 0 });
   }
 
   function clearSearch() {
     setQuery("");
-    setSource(INITIAL.source);
+    setSources(INITIAL.sources);
     setYears(INITIAL.years);
     setSize(INITIAL.size);
     setSubmitted(INITIAL);
@@ -130,7 +131,7 @@ export function Unicordoba() {
   const hasResult = Boolean(uniResult || multiResult);
   const totalPages = uniResult?.totalPaginas ?? 0;
   const currentPage = submitted.page;
-  const sizeOptions = source === "unicordoba" ? PAGE_SIZE_OPTIONS : PER_SOURCE_OPTIONS;
+  const sizeOptions = isRepository ? PAGE_SIZE_OPTIONS : PER_SOURCE_OPTIONS;
 
   return (
     <div className="max-w-5xl mx-auto animate-fade-in space-y-6">
@@ -152,14 +153,14 @@ export function Unicordoba() {
             {t("unicor.formTitle", "¿Qué quieres buscar?")}
           </CardTitle>
           <CardDescription>
-            {source === "unicordoba"
+            {isRepository
               ? t("unicor.formDesc", "Escribe un tema o déjalo vacío para ver lo más reciente del periodo seleccionado.")
               : t("unicor.formDescExternal", "Escribe un tema: las bases externas necesitan palabras clave para buscar.")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSearch} className="space-y-4" noValidate>
-            <SourcePicker value={source} onChange={changeSource} disabled={isSearching} />
+            <SourcePicker value={sources} onChange={changeSource} disabled={isSearching} />
 
             <label className="block text-sm font-medium text-ink-primary">
               {t("unicor.queryLabel", "Tema, autor o palabras clave")}
@@ -191,7 +192,7 @@ export function Unicordoba() {
                 </select>
               </label>
               <label className="text-sm font-medium text-ink-primary">
-                {source === "unicordoba" ? t("unicor.sizeLabel", "Resultados por página") : t("unicor.perSourceLabel", "Resultados por fuente")}
+                {isRepository ? t("unicor.sizeLabel", "Resultados por página") : t("unicor.perSourceLabel", "Resultados por fuente")}
                 <select value={size} onChange={(e) => setSize(Number(e.target.value))} className={inputClass}>
                   {sizeOptions.map((option) => (
                     <option key={option} value={option}>

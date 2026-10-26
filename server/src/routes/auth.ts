@@ -7,6 +7,7 @@ import {
   findUserByEmail,
   findUserById,
   linkClerkId,
+  updateUserName,
 } from "../db/users.js";
 import { burnPasswordCheck, hashPassword, verifyPassword, signToken } from "../lib/auth.js";
 import { resolveClerkProfile } from "../lib/clerk.js";
@@ -130,6 +131,24 @@ authRouter.get("/me", requireAuth, async (req, res) => {
     res.json({ user: publicUser(user) });
   } catch (err) {
     console.error("[GET /auth/me]", err);
+    res.status(502).json({ error: publicErrorMessage(err) });
+  }
+});
+
+authRouter.patch("/me", requireAuth, async (req, res) => {
+  try {
+    const { firstName, lastName } = (req.body ?? {}) as Record<string, unknown>;
+    if (!isString(firstName) || !isString(lastName) || !firstName.trim() || !lastName.trim()) {
+      return res.status(400).json({ error: "Nombre y apellido son requeridos" });
+    }
+    if (firstName.length > MAX_NAME_LENGTH || lastName.length > MAX_NAME_LENGTH) {
+      return res.status(400).json({ error: `Nombre y apellido admiten hasta ${MAX_NAME_LENGTH} caracteres` });
+    }
+
+    const user = await updateUserName(req.userId!, firstName, lastName);
+    res.json({ user: publicUser(user) });
+  } catch (err) {
+    console.error("[PATCH /auth/me]", err);
     res.status(502).json({ error: publicErrorMessage(err) });
   }
 });

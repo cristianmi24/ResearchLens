@@ -3,6 +3,9 @@ import { searchRepository, UnicordobaError } from "../lib/unicordoba.js";
 import { searchArticles as searchIeeeArticles } from "../lib/ieee.js";
 import { searchRecords as searchSpringerRecords } from "../lib/springer.js";
 import { searchDocuments as searchScopusDocuments } from "../lib/scopus.js";
+import { searchPapers as searchSemanticPapers } from "../lib/semanticScholar.js";
+import { searchWorks as searchOpenAlexWorks } from "../lib/openalex.js";
+import { searchWorks as searchCrossrefWorks } from "../lib/crossref.js";
 import type { Article } from "../types.js";
 
 export const unicordobaRouter = Router();
@@ -30,10 +33,13 @@ unicordobaRouter.get("/search", async (req, res) => {
   }
 });
 
-// IEEE Xplore, Springer Nature y Scopus tienen cuota diaria limitada: solo se consultan desde este
-// panel, cuando el usuario las elige a propósito, y nunca en el análisis automático de ideas.
+// Todas estas fuentes se consultan desde el panel combinado. IEEE Xplore, Springer Nature y Scopus
+// tienen cuota diaria limitada y nunca se consultan en el análisis automático de ideas.
 const SOURCES = {
   unicordoba: "Unicórdoba",
+  semantic: "Semantic Scholar",
+  openalex: "OpenAlex",
+  crossref: "Crossref",
   ieee: "IEEE Xplore",
   springer: "Springer Nature",
   scopus: "Scopus",
@@ -80,6 +86,9 @@ unicordobaRouter.get("/multi", async (req, res) => {
         source: SOURCES.unicordoba,
       }));
     },
+    semantic: async () => (await searchSemanticPapers(q, size)).articles.map(fromArticle),
+    openalex: async () => (await searchOpenAlexWorks(q, size)).articles.map(fromArticle),
+    crossref: async () => (await searchCrossrefWorks(q, size)).map(fromArticle),
     ieee: async () => (await searchIeeeArticles(q, size)).map(fromArticle),
     springer: async () => (await searchSpringerRecords(q, size)).map(fromArticle),
     scopus: async () => (await searchScopusDocuments(q, size)).map(fromArticle),

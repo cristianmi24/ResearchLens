@@ -12,6 +12,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (firstName: string, lastName: string) => Promise<AuthUser>;
   /** Aplica una sesión ya resuelta externamente (ej. tras sincronizar un login social de Clerk). */
   setSession: (token: string, sessionUser: AuthUser) => void;
 }
@@ -68,9 +69,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(sessionUser);
   }, []);
 
+  const updateProfile = useCallback(async (firstName: string, lastName: string) => {
+    const updatedUser = await authApi.updateProfile(firstName, lastName);
+    setUser(updatedUser);
+    return updatedUser;
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isLoading, isAuthenticated: Boolean(user), login, register, logout, setSession }),
-    [user, isLoading, login, register, logout, setSession],
+    () => ({ user, isLoading, isAuthenticated: Boolean(user), login, register, logout, updateProfile, setSession }),
+    [user, isLoading, login, register, logout, updateProfile, setSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

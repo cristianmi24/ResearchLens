@@ -49,6 +49,11 @@
   padding-top: var(--nav-h);
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.zetia-landing .landing-stage::-webkit-scrollbar {
+  display: none;
 }
 .zetia-landing .landing-panel {
   width: 100%;
@@ -384,23 +389,43 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
 }
 .zetia-landing .hero-stats div {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  border-radius: var(--radius);
+  gap: 20px;
+  padding: 22px 24px;
+  border-radius: 24px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.82);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(245, 246, 255, 0.86));
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.zetia-landing .hero-stats div::after {
+  content: "";
+  position: absolute;
+  right: -24px;
+  bottom: -34px;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: var(--gradient);
+  opacity: 0.1;
+}
+.zetia-landing .hero-stats div:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: 0 22px 42px -24px rgba(30, 40, 120, 0.48);
 }
 .zetia-landing .hero-stats dt {
-  min-width: 56px;
+  min-width: 72px;
   font-family: "Sora", sans-serif;
-  font-size: 2rem;
+  font-size: 2.45rem;
+  line-height: 1;
   font-weight: 700;
   background: var(--gradient);
   -webkit-background-clip: text;
@@ -409,7 +434,9 @@
 }
 .zetia-landing .hero-stats dd {
   margin: 0;
-  font-size: 0.95rem;
+  max-width: 120px;
+  font-size: 0.9rem;
+  line-height: 1.35;
   font-weight: 600;
   color: var(--text-2);
 }

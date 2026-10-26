@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
-import { ArrowRight, Compass, PlayCircle, Puzzle, Search, Sparkles } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpenText, GitCompareArrows, MessageCircleQuestion, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { RecentConversations } from "@/components/research/RecentConversations";
@@ -26,25 +26,25 @@ export function Home() {
 
   const discoveryCards = [
     {
-      icon: Search,
+      icon: BookOpenText,
       title: t("home.card1.title", "Literatura relacionada"),
       description: t("home.card1.desc", "Encuentra investigaciones similares a tu idea."),
       color: "var(--color-cat-1)",
     },
     {
-      icon: Compass,
+      icon: BarChart3,
       title: t("home.card2.title", "Nivel de exploración"),
       description: t("home.card2.desc", "Descubre si un tema está muy, moderadamente o poco explorado."),
       color: "var(--color-cat-3)",
     },
     {
-      icon: Puzzle,
+      icon: GitCompareArrows,
       title: t("home.card3.title", "Posibles oportunidades"),
       description: t("home.card3.desc", "Identifica diferencias entre tu idea y trabajos existentes."),
       color: "var(--color-cat-2)",
     },
     {
-      icon: Sparkles,
+      icon: MessageCircleQuestion,
       title: t("home.card4.title", "Mejora tu pregunta"),
       description: t("home.card4.desc", "Convierte una idea general en una pregunta de investigación más precisa."),
       color: "var(--color-cat-7)",

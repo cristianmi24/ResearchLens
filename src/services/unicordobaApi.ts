@@ -40,14 +40,17 @@ export async function searchUnicordoba(params: UnicordobaSearchParams): Promise<
 }
 
 /** Fuentes del panel: el repositorio institucional y las bases con cuota limitada (solo se usan aquí). */
-export type PanelSourceId = "unicordoba" | "ieee" | "springer" | "scopus";
+export type PanelSourceId = "unicordoba" | "semantic" | "openalex" | "crossref" | "ieee" | "springer" | "scopus";
 
 /** Opción del selector del panel: una fuente o todas. */
 export type SourceChoice = PanelSourceId | "all";
 
 /** Fuentes que realmente se consultan para cada opción del selector. */
-export function sourcesFor(choice: SourceChoice): PanelSourceId[] {
-  return choice === "all" ? ["unicordoba", "ieee", "springer", "scopus"] : [choice];
+export function sourcesFor(choice: SourceChoice | PanelSourceId[]): PanelSourceId[] {
+  if (Array.isArray(choice)) return choice;
+  return choice === "all"
+    ? ["unicordoba", "semantic", "openalex", "crossref", "ieee", "springer", "scopus"]
+    : [choice];
 }
 
 /** Documento normalizado para mostrar resultados de cualquier fuente del panel con la misma tarjeta. */

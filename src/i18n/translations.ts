@@ -55,8 +55,6 @@ export const translations = {
     "welcome.hero.stat1.label": "fuentes académicas",
     "welcome.hero.stat2.value": "3",
     "welcome.hero.stat2.label": "idiomas",
-    "welcome.hero.stat3.value": "IA",
-    "welcome.hero.stat3.label": "análisis semántico",
     "welcome.hero.card1": "de similitud con tu idea",
     "welcome.hero.card2Title": "Vacío detectado",
     "welcome.hero.card2": "Nueva oportunidad de estudio",
@@ -111,7 +109,7 @@ export const translations = {
     "welcome.team.bio3": "Profesor de la Universidad de Córdoba a cargo del curso en el que nació Zetia. Orientó y acompañó el desarrollo del proyecto.",
     "welcome.footer.tagline": "Exploración bibliográfica e inteligencia artificial para investigar con rumbo.",
     "welcome.footer.privacy": "Políticas y privacidad",
-    "welcome.footer.credits": "Un proyecto de LABSIE",
+    "welcome.footer.credits": "LABSIE",
     "welcome.footer.backToTop": "Volver arriba",
     
 
@@ -525,8 +523,6 @@ export const translations = {
     "welcome.hero.stat1.label": "academic sources",
     "welcome.hero.stat2.value": "3",
     "welcome.hero.stat2.label": "languages",
-    "welcome.hero.stat3.value": "AI",
-    "welcome.hero.stat3.label": "semantic analysis",
     "welcome.hero.card1": "similarity with your idea",
     "welcome.hero.card2Title": "Gap detected",
     "welcome.hero.card2": "New research opportunity",
@@ -581,7 +577,7 @@ export const translations = {
     "welcome.team.bio3": "Professor at Universidad de Córdoba in charge of the course where Zetia was born. Guided and supported the project's development.",
     "welcome.footer.tagline": "Literature exploration and artificial intelligence to research with direction.",
     "welcome.footer.privacy": "Privacy policy",
-    "welcome.footer.credits": "A LABSIE project",
+    "welcome.footer.credits": "LABSIE",
     "welcome.footer.backToTop": "Back to top",
     
 
@@ -995,8 +991,6 @@ export const translations = {
     "welcome.hero.stat1.label": "fontes acadêmicas",
     "welcome.hero.stat2.value": "3",
     "welcome.hero.stat2.label": "idiomas",
-    "welcome.hero.stat3.value": "IA",
-    "welcome.hero.stat3.label": "análise semântica",
     "welcome.hero.card1": "de similaridade com sua ideia",
     "welcome.hero.card2Title": "Lacuna detectada",
     "welcome.hero.card2": "Nova oportunidade de estudo",
@@ -1051,7 +1045,7 @@ export const translations = {
     "welcome.team.bio3": "Professor da Universidad de Córdoba responsável pelo curso em que a Zetia nasceu. Orientou e acompanhou o desenvolvimento do projeto.",
     "welcome.footer.tagline": "Exploração bibliográfica e inteligência artificial para pesquisar com rumo.",
     "welcome.footer.privacy": "Políticas e privacidade",
-    "welcome.footer.credits": "Um projeto do LABSIE",
+    "welcome.footer.credits": "LABSIE",
     "welcome.footer.backToTop": "Voltar ao topo",
     
 

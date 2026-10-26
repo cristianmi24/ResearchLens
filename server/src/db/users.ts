@@ -46,6 +46,14 @@ export async function findUserById(id: string): Promise<User | undefined> {
   return result.rows[0] ? rowToUser(result.rows[0]) : undefined;
 }
 
+export async function updateUserName(userId: string, firstName: string, lastName: string): Promise<User> {
+  const result = await query(
+    `UPDATE users SET first_name = $2, last_name = $3 WHERE id = $1 RETURNING *`,
+    [userId, firstName.trim(), lastName.trim()],
+  );
+  return rowToUser(result.rows[0]);
+}
+
 export async function findUserByClerkId(clerkUserId: string): Promise<User | undefined> {
   const result = await query(`SELECT * FROM users WHERE clerk_user_id = $1`, [clerkUserId]);
   return result.rows[0] ? rowToUser(result.rows[0]) : undefined;

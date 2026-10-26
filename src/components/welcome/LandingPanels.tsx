@@ -63,7 +63,7 @@ export function HeroPanel({ onRegister, howLinkProps }: HeroPanelProps) {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          {["stat1", "stat2", "stat3"].map((stat) => (
+          {["stat1", "stat2"].map((stat) => (
             <div key={stat}>
               <dt>{t(`welcome.hero.${stat}.value`)}</dt>
               <dd>{t(`welcome.hero.${stat}.label`)}</dd>
