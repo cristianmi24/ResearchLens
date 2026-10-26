@@ -1,16 +1,26 @@
 import { useState, useRef, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronDown, Globe, Menu, X } from "lucide-react";
+import { Check, ChevronDown, Globe, LogOut, Menu, X } from "lucide-react";
 import { navItems } from "@/components/navigation/navItems";
+import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { LANGUAGE_OPTIONS } from "@/i18n/types";
+
+function initials(firstName?: string, lastName?: string, email?: string): string {
+  if (firstName || lastName) {
+    return `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase() || "?";
+  }
+  return (email?.[0] ?? "?").toUpperCase();
+}
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const { t, language, setLanguage } = useLanguage();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const currentLang = LANGUAGE_OPTIONS.find((o) => o.code === language) ?? LANGUAGE_OPTIONS[0];
 
@@ -24,6 +34,28 @@ export function MobileNav() {
     document.addEventListener("mousedown", onOutside);
     return () => document.removeEventListener("mousedown", onOutside);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  function handleLogout() {
+    logout();
+    setOpen(false);
+    navigate("/");
+  }
 
   return (
     <div className="lg:hidden">
@@ -107,7 +139,10 @@ export function MobileNav() {
               transition={{ duration: 0.2 }}
             />
             <motion.div
-              className="absolute left-0 top-0 h-full w-72 max-w-[82vw] bg-white shadow-2xl flex flex-col"
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("nav.menu", "Menú")}
+              className="absolute left-0 top-0 flex h-full w-80 max-w-[88vw] flex-col bg-white shadow-2xl"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
@@ -128,7 +163,7 @@ export function MobileNav() {
                 </button>
               </div>
 
-              <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+              <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 overscroll-contain">
                 {navItems.map((item) => (
                   <NavLink
                     key={item.to}
@@ -195,6 +230,34 @@ export function MobileNav() {
                   })}
                 </div>
               </div>
+
+              {user && (
+                <div className="border-t border-border px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+                  <div className="mb-2 flex items-center gap-2.5 px-1">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-xs font-semibold text-white">
+                      {initials(user.firstName, user.lastName, user.email)}
+                    </div>
+                    <div className="min-w-0">
+                      {(user.firstName || user.lastName) && (
+                        <p className="truncate text-sm font-semibold leading-tight text-ink-primary">
+                          {user.firstName} {user.lastName}
+                        </p>
+                      )}
+                      <p className="truncate text-xs leading-tight text-ink-secondary" title={user.email}>
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex min-h-11 w-full items-center gap-2.5 rounded-xl px-3 text-sm font-semibold text-status-critical-text transition-colors hover:bg-status-critical-bg focus-ring"
+                  >
+                    <LogOut size={17} aria-hidden="true" />
+                    {t("nav.logout", "Cerrar sesión")}
+                  </button>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

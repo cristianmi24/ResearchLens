@@ -108,11 +108,11 @@ export function AIResearchAssistant() {
         aria-label={t("assistant.button", "Preguntar al asistente")}
         title={t("assistant.button", "Preguntar al asistente")}
         className={cn(
-          "fixed bottom-5 right-5 z-40 inline-flex h-20 w-20 items-center justify-center rounded-full bg-transparent p-0 text-white drop-shadow-lg transition-transform hover:scale-105 focus-ring",
+          "fixed bottom-4 right-4 z-40 inline-flex h-16 w-16 items-center justify-center rounded-full bg-transparent p-0 text-white drop-shadow-lg transition-transform hover:scale-105 focus-ring sm:bottom-5 sm:right-5 sm:h-20 sm:w-20",
           open && "hidden"
         )}
       >
-        <img src="/mascota.png" alt="" className="h-20 w-20 object-contain" />
+        <img src="/mascota.png" alt="" className="h-16 w-16 object-contain sm:h-20 sm:w-20" />
       </button>
 
       {open && (
