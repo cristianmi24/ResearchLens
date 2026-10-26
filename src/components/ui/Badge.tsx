@@ -8,7 +8,7 @@ const toneStyles: Record<Tone, string> = {
   good: "bg-status-good-bg text-status-good-text",
   warning: "bg-status-warning-bg text-status-warning-text",
   critical: "bg-status-critical-bg text-status-critical-text",
-  brand: "bg-brand-50 text-brand-700",
+  brand: "bg-pastel-lavender text-pastel-lavender-ink",
 };
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {

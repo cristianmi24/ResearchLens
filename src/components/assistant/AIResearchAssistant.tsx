@@ -75,12 +75,33 @@ export function AIResearchAssistant() {
     }
 
     setIsThinking(true);
-    const response = await askAssistant(trimmed);
-    setMessages((prev) => [
-      ...prev,
-      { id: nextId(), role: "assistant", createdAt: new Date().toISOString(), source: "ai", ...response },
-    ]);
-    setIsThinking(false);
+    try {
+      const response = await askAssistant(trimmed);
+      const assistantMessage: AssistantMessage = {
+        id: nextId(),
+        role: "assistant",
+        createdAt: new Date().toISOString(),
+        source: "ai",
+        ...response,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+      void saveAssistantMessages([userMessage, assistantMessage]).catch((err) =>
+        console.error("[assistant] no se pudo persistir la conversación con Qwen:", err),
+      );
+    } catch (err) {
+      const errorMessage: AssistantMessage = {
+        id: nextId(),
+        role: "assistant",
+        text: err instanceof Error
+          ? err.message
+          : t("assistant.error", "No pude consultar al asistente. Intenta de nuevo."),
+        createdAt: new Date().toISOString(),
+        source: "ai",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsThinking(false);
+    }
   }
 
   function handleSubmit(e: FormEvent) {

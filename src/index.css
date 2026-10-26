@@ -20,33 +20,50 @@
 }
 
 @theme {
-  /* Atkinson Hyperlegible: diseñada para máxima legibilidad/accesibilidad, usada por
-     universidades y proyectos educativos — texto del sistema. Crimson Pro: serif académica
-     clásica (papers, revistas científicas) — títulos y encabezados. */
-  --font-sans: "Atkinson Hyperlegible", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: "Crimson Pro", Georgia, "Times New Roman", serif;
+  /* Tipografía unificada con el inicio público: Plus Jakarta Sans (texto, muy legible y amable) y
+     Sora (títulos, geométrica y con carácter). La clase font-serif se conserva como "display". */
+  --font-sans: "Plus Jakarta Sans", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "Sora", "Plus Jakarta Sans", system-ui, sans-serif;
 
-  /* Surfaces */
-  --color-surface: #f8fafc;
+  /* Superficies: blanco con un toque lavanda para que el pastel se sienta en toda la app */
+  --color-surface: #f8f7fd;
   --color-surface-card: #ffffff;
-  --color-surface-muted: #f1f5f9;
+  --color-surface-muted: #f2f0fa;
 
-  /* Ink */
-  --color-ink-primary: #0f172a;
-  --color-ink-secondary: #475569;
-  --color-ink-muted: #8b8f99;
+  /* Tinta: azul noche violáceo (contraste AA sobre blanco y pasteles) */
+  --color-ink-primary: #1e1b3a;
+  --color-ink-secondary: #545074;
+  --color-ink-muted: #7d7a98;
 
-  /* Brand: deep academic blue */
-  --color-brand-50: #eef4fc;
-  --color-brand-100: #cde2fb;
-  --color-brand-200: #9ec5f4;
-  --color-brand-300: #6da7ec;
-  --color-brand-400: #3987e5;
-  --color-brand-500: #2a78d6;
-  --color-brand-600: #256abf;
-  --color-brand-700: #184f95;
-  --color-brand-800: #133e77;
-  --color-brand-900: #0f2f59;
+  /* Marca: periwinkle-violeta, tomado del logo de Zetia */
+  --color-brand-50: #f4f2ff;
+  --color-brand-100: #e9e5ff;
+  --color-brand-200: #d4ccff;
+  --color-brand-300: #b5a9fb;
+  --color-brand-400: #9483f4;
+  --color-brand-500: #7865ea;
+  --color-brand-600: #604cd8;
+  --color-brand-700: #4e3cb8;
+  --color-brand-800: #3f3194;
+  --color-brand-900: #332a75;
+
+  /* Pasteles de acento (fondo + tinta legible encima). Se usan en el menú, tarjetas y chips. */
+  --color-pastel-lavender: #ece8ff;
+  --color-pastel-lavender-ink: #5b45d0;
+  --color-pastel-mint: #d7f7e8;
+  --color-pastel-mint-ink: #0f7a55;
+  --color-pastel-peach: #ffe6d9;
+  --color-pastel-peach-ink: #b4501f;
+  --color-pastel-sky: #dcecff;
+  --color-pastel-sky-ink: #2160c4;
+  --color-pastel-pink: #ffe3f1;
+  --color-pastel-pink-ink: #b8306f;
+  --color-pastel-aqua: #d4f4f5;
+  --color-pastel-aqua-ink: #0b7479;
+  --color-pastel-indigo: #e2e7ff;
+  --color-pastel-indigo-ink: #3a4cc0;
+  --color-pastel-butter: #fff3c9;
+  --color-pastel-butter-ink: #946200;
 
   /* Status (fixed — never reused as categorical) */
   --color-status-good: #0ca30c;
@@ -69,10 +86,11 @@
   --color-cat-7: #4a3aa7;
   --color-cat-8: #e34948;
 
-  --color-border: #e2e8f0;
+  --color-border: #e8e5f4;
 
-  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
-  --shadow-card-hover: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.05);
+  /* Sombras teñidas de violeta: más suaves y "aireadas" que el gris neutro */
+  --shadow-card: 0 1px 2px 0 rgb(76 60 184 / 0.04), 0 6px 18px -8px rgb(76 60 184 / 0.12);
+  --shadow-card-hover: 0 14px 34px -14px rgb(76 60 184 / 0.28), 0 2px 6px -2px rgb(76 60 184 / 0.08);
 
   --animate-fade-in: fade-in 0.35s ease-out;
   --animate-slide-up: slide-up 0.3s ease-out;
@@ -92,7 +110,13 @@
     -webkit-font-smoothing: antialiased;
   }
   body {
+    /* Fondo con manchas pastel muy suaves y fijas: da calidez sin competir con el contenido. */
     background-color: var(--color-surface);
+    background-image:
+      radial-gradient(38rem 28rem at 100% 0%, rgb(220 236 255 / 0.7), transparent 70%),
+      radial-gradient(34rem 26rem at 0% 100%, rgb(215 247 232 / 0.5), transparent 70%),
+      radial-gradient(30rem 24rem at 40% 45%, rgb(236 232 255 / 0.45), transparent 70%);
+    background-attachment: fixed;
     color: var(--color-ink-primary);
   }
   /* Anillo de foco visible en todo elemento enfocable al navegar con teclado (WCAG 2.4.7). */
@@ -117,10 +141,10 @@
   .skip-link:focus {
     transform: none;
   }
-  /* Encabezados en serif académica en toda la app (papers, revistas científicas);
-     el texto de cuerpo se queda en la sans accesible para no sacrificar legibilidad. */
+  /* Encabezados en Sora (la misma del inicio público) en toda la app. */
   h1, h2, h3 {
     font-family: var(--font-serif);
+    letter-spacing: -0.02em;
   }
   ::selection {
     background-color: var(--color-brand-100);

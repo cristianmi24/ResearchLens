@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, GraduationCap, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Library, Search, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import {
   searchMultiSource,
   searchUnicordoba,
@@ -19,8 +18,11 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 const PER_SOURCE_OPTIONS = [5, 10, 15, 25];
 const YEARS_OPTIONS = [1, 3, 5, 10, 20];
 
-const inputClass =
-  "mt-1.5 h-11 w-full rounded-lg border border-border bg-white px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
+const selectClass =
+  "mt-1.5 h-11 w-full rounded-xl border border-border bg-white px-3 text-sm font-normal outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-100";
+
+// Temas de ejemplo: un clic los escribe en el buscador, para quien no sabe por dónde empezar.
+const EXAMPLE_QUERIES = ["inteligencia artificial en educación", "dengue", "agricultura sostenible", "salud mental en universitarios"];
 
 interface Submitted {
   sources: PanelSourceId[];
@@ -48,6 +50,7 @@ export function Unicordoba() {
   const [selected, setSelected] = useState<PanelDocument | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
+  const [showOptions, setShowOptions] = useState(false);
 
   const isRepository = submitted.sources.length === 1 && submitted.sources[0] === "unicordoba";
 
@@ -133,37 +136,43 @@ export function Unicordoba() {
   const currentPage = submitted.page;
   const sizeOptions = isRepository ? PAGE_SIZE_OPTIONS : PER_SOURCE_OPTIONS;
 
+  function searchExample(example: string) {
+    // Un ejemplo busca en las tres fuentes abiertas, que no gastan cuota.
+    const open: PanelSourceId[] = ["semantic", "openalex", "crossref"];
+    setQuery(example);
+    setSources(open);
+    setSize(10);
+    setError("");
+    setSubmitted({ sources: open, q: example, years, size: 10, page: 0 });
+  }
+
+  const sizeLabel = isRepository ? t("unicor.sizeLabel", "Resultados por página") : t("unicor.perSourceLabel", "Resultados por fuente");
+
   return (
-    <div className="max-w-5xl mx-auto animate-fade-in space-y-6">
-      <div>
-        <p className="text-sm font-medium text-brand-600">{t("unicor.badge", "Repositorio institucional y bases especializadas")}</p>
-        <h1 className="text-2xl font-semibold text-ink-primary mt-1">{t("unicor.title", "Panel de búsqueda")}</h1>
-        <p className="text-ink-secondary mt-2">
-          {t(
-            "unicor.subtitle",
-            "Busca en el repositorio de la Universidad de Córdoba o elige IEEE Xplore, Springer Nature, Scopus o todas a la vez."
-          )}
-        </p>
-      </div>
+    <div className="mx-auto max-w-5xl animate-fade-in space-y-6">
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-pastel-sky via-pastel-lavender to-pastel-aqua p-6 sm:p-8">
+        <span className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/40" aria-hidden="true" />
+        <span className="pointer-events-none absolute -bottom-16 left-1/3 h-44 w-44 rounded-full bg-pastel-mint/70 blur-2xl" aria-hidden="true" />
+        <div className="relative flex items-start gap-4">
+          <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-brand-600 shadow-sm sm:flex">
+            <Library size={24} aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
+              {t("unicor.badge", "Repositorio institucional y bases especializadas")}
+            </p>
+            <h1 className="mt-1 text-3xl font-bold text-ink-primary">{t("unicor.title", "Buscar literatura")}</h1>
+            <p className="mt-2 max-w-2xl text-ink-secondary">
+              {t("unicor.subtitle", "Consulta el repositorio de la Universidad de Córdoba y las principales bases académicas desde un solo lugar.")}
+            </p>
+          </div>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GraduationCap size={18} className="text-brand-600" />
-            {t("unicor.formTitle", "¿Qué quieres buscar?")}
-          </CardTitle>
-          <CardDescription>
-            {isRepository
-              ? t("unicor.formDesc", "Escribe un tema o déjalo vacío para ver lo más reciente del periodo seleccionado.")
-              : t("unicor.formDescExternal", "Escribe un tema: las bases externas necesitan palabras clave para buscar.")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSearch} className="space-y-4" noValidate>
-            <SourcePicker value={sources} onChange={changeSource} disabled={isSearching} />
-
-            <label className="block text-sm font-medium text-ink-primary">
-              {t("unicor.queryLabel", "Tema, autor o palabras clave")}
+        <form onSubmit={handleSearch} className="relative mt-6" noValidate>
+          <div className="flex flex-col gap-2 rounded-3xl bg-white p-2 shadow-[var(--shadow-card-hover)] sm:flex-row sm:items-center">
+            <label className="relative min-w-0 flex-1">
+              <span className="sr-only">{t("unicor.queryLabel", "Tema, autor o palabras clave")}</span>
+              <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-brand-500" aria-hidden="true" />
               <input
                 value={query}
                 onChange={(e) => {
@@ -174,26 +183,82 @@ export function Unicordoba() {
                 maxLength={200}
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? "panel-error" : undefined}
-                className={inputClass}
+                className="h-12 w-full rounded-2xl bg-transparent pl-11 pr-10 text-base text-ink-primary outline-none placeholder:text-ink-muted focus:bg-pastel-lavender/30"
               />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label={t("history.clearSearch", "Borrar búsqueda")}
+                  title={t("history.clearSearch", "Borrar búsqueda")}
+                  className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-ink-muted hover:bg-surface-muted hover:text-ink-primary focus-ring"
+                >
+                  <X size={15} />
+                </button>
+              )}
             </label>
+            <Button type="submit" size="lg" disabled={isSearching} className="sm:min-w-36">
+              <Search size={17} />
+              {isSearching ? t("unicor.searching", "Consultando...") : t("unicor.submitBtn", "Buscar")}
+            </Button>
+          </div>
+          {error && (
+            <p id="panel-error" className="mt-3 rounded-2xl bg-white/90 px-4 py-2.5 text-sm font-semibold text-status-critical-text" role="alert">
+              {error}
+            </p>
+          )}
+        </form>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="text-sm font-medium text-ink-primary">
+        {/* Sugerencias de tema: un clic busca en las fuentes abiertas (sin gastar cuota). Se ocultan al buscar algo propio. */}
+        {!submitted.q && (
+          <div className="relative mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-brand-700">{t("unicor.emptyTitle", "Prueba con")}</span>
+            {EXAMPLE_QUERIES.map((example) => (
+              <button
+                key={example}
+                type="button"
+                onClick={() => searchExample(example)}
+                disabled={isSearching}
+                className="min-h-10 rounded-full bg-white/80 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-white focus-ring disabled:opacity-60"
+              >
+                {example}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-3xl border border-border bg-white/90 p-5 shadow-[var(--shadow-card)]">
+        <SourcePicker value={sources} onChange={changeSource} disabled={isSearching} />
+
+        <div className="mt-4 border-t border-border/70 pt-3">
+          <button
+            type="button"
+            onClick={() => setShowOptions((v) => !v)}
+            aria-expanded={showOptions}
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-ink-secondary hover:text-brand-700 focus-ring"
+          >
+            <SlidersHorizontal size={15} aria-hidden="true" />
+            {t("unicor.moreOptions", "Periodo y cantidad de resultados")}
+            <span className="rounded-full bg-pastel-lavender px-2 py-0.5 text-[11px] text-pastel-lavender-ink">
+              {years === 1 ? t("unicor.lastYear", "Último año") : `${years} ${t("unicor.yearsUnit", "años")}`} · {size}
+            </span>
+          </button>
+          {showOptions && (
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <label className="text-sm font-semibold text-ink-primary">
                 {t("unicor.yearsLabel", "Periodo")}
-                <select value={years} onChange={(e) => setYears(Number(e.target.value))} className={inputClass}>
+                <select value={years} onChange={(e) => setYears(Number(e.target.value))} className={selectClass}>
                   {YEARS_OPTIONS.map((option) => (
                     <option key={option} value={option}>
-                      {option === 1
-                        ? t("unicor.lastYear", "Último año")
-                        : `${t("unicor.lastYears", "Últimos")} ${option} ${t("unicor.yearsUnit", "años")}`}
+                      {option === 1 ? t("unicor.lastYear", "Último año") : `${t("unicor.lastYears", "Últimos")} ${option} ${t("unicor.yearsUnit", "años")}`}
                     </option>
                   ))}
                 </select>
               </label>
-              <label className="text-sm font-medium text-ink-primary">
-                {isRepository ? t("unicor.sizeLabel", "Resultados por página") : t("unicor.perSourceLabel", "Resultados por fuente")}
-                <select value={size} onChange={(e) => setSize(Number(e.target.value))} className={inputClass}>
+              <label className="text-sm font-semibold text-ink-primary">
+                {sizeLabel}
+                <select value={size} onChange={(e) => setSize(Number(e.target.value))} className={selectClass}>
                   {sizeOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -202,46 +267,38 @@ export function Unicordoba() {
                 </select>
               </label>
             </div>
+          )}
+        </div>
+      </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button type="submit" disabled={isSearching}>
-                <Search size={17} />
-                {isSearching ? t("unicor.searching", "Consultando...") : t("unicor.submitBtn", "Buscar")}
-              </Button>
-              <Button type="button" variant="ghost" onClick={clearSearch} disabled={isSearching}>
-                <X size={17} />
-                {t("unicor.clearBtn", "Limpiar")}
-              </Button>
-            </div>
-
-            {error && (
-              <p id="panel-error" className="text-sm text-status-critical-text" role="alert">
-                {error}
+      {(uniResult || multiResult) && !error && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            {uniResult && (
+              <p className="text-sm text-ink-secondary" aria-live="polite">
+                <span className="font-serif text-xl font-bold text-ink-primary">{uniResult.totalElementos.toLocaleString()}</span>{" "}
+                {t("unicor.resultsFound", "documentos encontrados desde")} {uniResult.desdeAnio}
+                {submitted.q && (
+                  <>
+                    {" "}
+                    {t("unicor.for", "para")} <span className="font-semibold text-ink-primary">«{submitted.q}»</span>
+                  </>
+                )}
               </p>
             )}
-          </form>
-        </CardContent>
-      </Card>
-
-      {uniResult && !error && (
-        <p className="text-sm text-ink-secondary" aria-live="polite">
-          <span className="font-semibold text-ink-primary">{uniResult.totalElementos.toLocaleString()}</span>{" "}
-          {t("unicor.resultsFound", "documentos encontrados desde")} {uniResult.desdeAnio}
-          {submitted.q && (
-            <>
-              {" "}
-              {t("unicor.for", "para")} <span className="font-medium text-ink-primary">“{submitted.q}”</span>
-            </>
-          )}
-        </p>
+            {multiResult && <SourceSummary result={multiResult} query={submitted.q} />}
+          </div>
+          <Button type="button" variant="ghost" size="sm" onClick={clearSearch} disabled={isSearching}>
+            <X size={15} />
+            {t("unicor.clearBtn", "Limpiar")}
+          </Button>
+        </div>
       )}
 
-      {multiResult && !error && <SourceSummary result={multiResult} query={submitted.q} />}
-
       {isSearching && !hasResult && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2" aria-busy="true">
           {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-44 rounded-xl border border-border bg-surface-muted animate-pulse" />
+            <div key={i} className="h-48 animate-pulse rounded-3xl bg-gradient-to-br from-pastel-lavender/60 to-pastel-sky/50" />
           ))}
         </div>
       )}
@@ -255,9 +312,11 @@ export function Unicordoba() {
       )}
 
       {hasResult && !isSearching && !error && documents.length === 0 && (
-        <p className="py-10 text-center text-sm text-ink-muted">
-          {t("unicor.noResults", "No encontramos documentos con esos criterios. Prueba otras palabras o amplía el periodo.")}
-        </p>
+        <div className="rounded-3xl border border-border bg-white px-6 py-10 text-center">
+          <p className="text-sm text-ink-secondary">
+            {t("unicor.noResults", "No encontramos documentos con esos criterios. Prueba otras palabras o amplía el periodo.")}
+          </p>
+        </div>
       )}
 
       {isRepository && totalPages > 1 && (
@@ -266,15 +325,10 @@ export function Unicordoba() {
             <ChevronLeft size={16} />
             {t("unicor.prev", "Anterior")}
           </Button>
-          <span className="text-sm text-ink-secondary">
+          <span className="rounded-full bg-pastel-lavender px-3 py-1 text-sm font-semibold text-pastel-lavender-ink">
             {t("unicor.page", "Página")} {currentPage + 1} / {totalPages}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={isSearching || currentPage >= totalPages - 1}
-          >
+          <Button variant="outline" size="sm" onClick={() => goToPage(currentPage + 1)} disabled={isSearching || currentPage >= totalPages - 1}>
             {t("unicor.next", "Siguiente")}
             <ChevronRight size={16} />
           </Button>

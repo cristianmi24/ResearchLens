@@ -1,9 +1,8 @@
 import { AlertTriangle, BookOpen, ExternalLink, User, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
 import type { MultiSourceResult, PanelDocument } from "@/services/unicordobaApi";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { sourceStyleByName } from "./sourceStyles";
 
 const REPOSITORY_URL = "https://repositorio.unicordoba.edu.co";
 
@@ -16,27 +15,30 @@ function documentLink(doc: PanelDocument): string | null {
 
 export function DocumentCard({ doc, onOpen }: { doc: PanelDocument; onOpen: () => void }) {
   const { t } = useLanguage();
+  const style = sourceStyleByName(doc.source);
   return (
-    <Card className="flex flex-col p-5 hover:border-brand-300 transition-colors">
+    <article
+      className={`group flex flex-col rounded-3xl border border-l-4 border-border bg-white p-5 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)] ${style.accent}`}
+    >
       <div className="flex flex-wrap items-center gap-2">
-        <Badge tone="brand">{doc.year || "s.f."}</Badge>
-        <Badge>{doc.source}</Badge>
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${style.chip}`}>{doc.source}</span>
+        <span className="rounded-full bg-surface-muted px-2.5 py-1 text-[11px] font-semibold text-ink-secondary">{doc.year || "s.f."}</span>
       </div>
-      <h3 className="mt-3 text-sm font-semibold text-ink-primary leading-snug line-clamp-3">{doc.title}</h3>
+      <h3 className="mt-3 line-clamp-3 font-serif text-[0.95rem] font-semibold leading-snug text-ink-primary">{doc.title}</h3>
       {doc.authors.length > 0 && (
         <p className="mt-2 flex items-start gap-1.5 text-xs text-ink-secondary">
           <User size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span className="line-clamp-2">{doc.authors.join("; ")}</span>
         </p>
       )}
-      {doc.abstract && <p className="mt-3 text-sm text-ink-secondary line-clamp-4">{doc.abstract}</p>}
+      {doc.abstract && <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-ink-secondary">{doc.abstract}</p>}
       <div className="mt-auto pt-4">
-        <Button size="sm" variant="outline" onClick={onOpen}>
+        <Button size="sm" variant="secondary" onClick={onOpen}>
           <BookOpen size={15} />
           {t("unicor.viewMore", "Ver resumen completo")}
         </Button>
       </div>
-    </Card>
+    </article>
   );
 }
 
@@ -51,7 +53,7 @@ export function DocumentModal({ doc, onClose }: { doc: PanelDocument; onClose: (
         className="absolute inset-0 bg-ink-primary/40 backdrop-blur-[2px]"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
         <button
           type="button"
           onClick={onClose}
@@ -62,10 +64,10 @@ export function DocumentModal({ doc, onClose }: { doc: PanelDocument; onClose: (
           <X size={18} />
         </button>
         <div className="flex items-center gap-2 pr-10">
-          <Badge tone="brand">{doc.year || "s.f."}</Badge>
-          <Badge>{doc.source}</Badge>
+          <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${sourceStyleByName(doc.source).chip}`}>{doc.source}</span>
+          <span className="rounded-full bg-surface-muted px-2.5 py-1 text-[11px] font-semibold text-ink-secondary">{doc.year || "s.f."}</span>
         </div>
-        <h2 id="doc-title" className="mt-3 text-lg font-semibold text-ink-primary leading-snug">
+        <h2 id="doc-title" className="mt-3 font-serif text-lg font-semibold leading-snug text-ink-primary">
           {doc.title}
         </h2>
         {doc.authors.length > 0 && <p className="mt-2 text-sm text-ink-secondary">{doc.authors.join("; ")}</p>}
@@ -103,8 +105,8 @@ export function SourceSummary({ result, query }: { result: MultiSourceResult; qu
       {result.sources.map((s) => (
         <span
           key={s.id}
-          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-            s.ok ? "bg-surface-muted text-ink-secondary" : "bg-status-warning-bg text-status-warning-text"
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
+            s.ok ? sourceStyleByName(s.name).chip : "bg-status-warning-bg text-status-warning-text"
           }`}
         >
           {!s.ok && <AlertTriangle size={12} aria-hidden="true" />}

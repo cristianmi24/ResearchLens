@@ -15,6 +15,7 @@ const crumbs: Record<string, [TranslationKey | string, string, string?]> = {
   "/refine": ["breadcrumb.refine", "Refinar pregunta", "/opportunities"],
   "/article-search": ["nav.search", "Buscar literatura", "/inicio"],
   "/unicordoba": ["nav.search", "Buscar literatura", "/inicio"],
+  "/evaluar": ["nav.evaluate", "Evaluar documento", "/inicio"],
   "/projects": ["nav.projects", "Mis proyectos", "/inicio"],
   "/history": ["nav.history", "Mi historial", "/inicio"],
   "/settings": ["nav.settings", "Configuración", "/inicio"],

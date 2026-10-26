@@ -9,6 +9,7 @@ import { researchRouter } from "./routes/research.js";
 import { assistantRouter } from "./routes/assistant.js";
 import { projectsRouter } from "./routes/projects.js";
 import { unicordobaRouter } from "./routes/unicordoba.js";
+import { evaluateRouter } from "./routes/evaluate.js";
 import { requireAuth } from "./middleware/requireAuth.js";
 
 const app = express();
@@ -65,7 +66,7 @@ const expensiveLimiter = rateLimit({
 
 app.use("/api", apiLimiter);
 app.use(
-  ["/api/research/analyze", "/api/research/refine", "/api/research/article-search", "/api/assistant/chat", "/api/unicordoba"],
+  ["/api/research/analyze", "/api/research/refine", "/api/research/article-search", "/api/assistant/chat", "/api/unicordoba", "/api/evaluate"],
   expensiveLimiter,
 );
 
@@ -95,6 +96,7 @@ app.use("/api/research", requireAuth, researchRouter);
 app.use("/api/assistant", requireAuth, assistantRouter);
 app.use("/api/projects", requireAuth, projectsRouter);
 app.use("/api/unicordoba", requireAuth, unicordobaRouter);
+app.use("/api/evaluate", requireAuth, evaluateRouter);
 
 // Rutas de API inexistentes: JSON 404 en vez de la página HTML por defecto de Express.
 app.use("/api", (_req, res) => {

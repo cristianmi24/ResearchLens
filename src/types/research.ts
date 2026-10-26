@@ -156,6 +156,10 @@ export interface SessionHistoryEntry {
   originalIdea: string;
   relatedStudiesCount: number;
   createdAt: string;
+  /** Pueden ser null en análisis antiguos que no guardaron esos datos. */
+  academicLevel: AcademicLevel | null;
+  explorationLevel: "bajo" | "moderado" | "alto" | null;
+  trend: "creciente" | "estable" | "decreciente" | null;
 }
 
 /**

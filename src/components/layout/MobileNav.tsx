@@ -1,18 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronDown, Globe, LogOut, Menu, X } from "lucide-react";
-import { navItems } from "@/components/navigation/navItems";
+import { NavList } from "@/components/navigation/NavList";
+import { UserCard } from "@/components/layout/UserCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { LANGUAGE_OPTIONS } from "@/i18n/types";
-
-function initials(firstName?: string, lastName?: string, email?: string): string {
-  if (firstName || lastName) {
-    return `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase() || "?";
-  }
-  return (email?.[0] ?? "?").toUpperCase();
-}
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -60,18 +54,20 @@ export function MobileNav() {
   return (
     <div className="lg:hidden">
       {/* ── Header fijo ── */}
-      <header className="flex items-center justify-between h-14 px-4 border-b border-border bg-white/90 backdrop-blur-sm sticky top-0 z-30">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/70 bg-white/80 px-4 backdrop-blur-xl">
         {/* Logo + toggle */}
         <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setOpen(true)}
             aria-label={t("nav.menu", "Abrir menú")}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface-muted hover:text-ink-primary transition-colors focus-ring"
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-pastel-lavender text-pastel-lavender-ink transition-transform hover:scale-105 focus-ring"
           >
             <Menu size={20} />
           </button>
-          <img src="/logos/zetia-icon.webp" alt="Zetia logo" className="h-9 w-9 object-contain rounded-md shadow-xs" />
+          <Link to="/inicio" className="focus-ring rounded-lg" aria-label="Zetia">
+            <img src="/logos/zetia.webp" alt="Zetia" className="h-8 w-auto" />
+          </Link>
         </div>
 
         {/* Desplegable de idioma compacto en el header */}
@@ -79,9 +75,10 @@ export function MobileNav() {
           <button
             type="button"
             onClick={() => setLangOpen((v) => !v)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-border bg-white hover:bg-surface-muted transition-colors focus-ring"
+            aria-expanded={langOpen}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-2xl border border-border/80 bg-white/90 px-3 text-xs font-semibold transition-colors hover:bg-white focus-ring"
           >
-            <Globe size={13} className="text-brand-600" />
+            <Globe size={13} className="text-pastel-sky-ink" />
             <span>{currentLang.flag}</span>
             <span className="text-ink-primary">{currentLang.shortLabel}</span>
             <ChevronDown size={11} className={`text-ink-muted transition-transform duration-150 ${langOpen ? "rotate-180" : ""}`} />
@@ -94,7 +91,7 @@ export function MobileNav() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.14, ease: "easeOut" }}
-                className="absolute right-0 top-full mt-1.5 w-36 rounded-xl border border-border bg-white shadow-lg overflow-hidden z-50"
+                className="absolute right-0 top-full z-50 mt-1.5 w-40 overflow-hidden rounded-2xl border border-border bg-white shadow-[var(--shadow-card-hover)]"
               >
                 {LANGUAGE_OPTIONS.map((opt) => {
                   const isActive = language === opt.code;
@@ -109,7 +106,7 @@ export function MobileNav() {
                       className={[
                         "w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-left",
                         isActive
-                          ? "bg-brand-50 text-brand-700 font-semibold"
+                          ? "bg-pastel-lavender text-brand-700 font-semibold"
                           : "text-ink-primary hover:bg-surface-muted",
                       ].join(" ")}
                     >
@@ -142,58 +139,32 @@ export function MobileNav() {
               role="dialog"
               aria-modal="true"
               aria-label={t("nav.menu", "Menú")}
-              className="absolute left-0 top-0 flex h-full w-80 max-w-[88vw] flex-col bg-white shadow-2xl"
+              className="absolute left-0 top-0 flex h-full w-80 max-w-[88vw] flex-col overflow-y-auto overscroll-contain bg-gradient-to-b from-white via-[#f7f9ff] to-pastel-sky shadow-2xl"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 340, damping: 34 }}
             >
-              <div className="flex items-center justify-between h-14 px-4 border-b border-border shrink-0">
-                <div className="flex items-center gap-2">
-                  <img src="/logos/zetia-icon.webp" alt="Zetia logo" className="h-6 w-6 object-contain rounded-md" />
-                  <span className="font-semibold text-ink-primary text-sm">{t("nav.menu", "Menú")}</span>
-                </div>
+              <div className="flex h-16 shrink-0 items-center justify-between px-4">
+                <img src="/logos/zetia.webp" alt="Zetia" className="h-8 w-auto" />
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  aria-label="Cerrar menú"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-secondary hover:bg-surface-muted transition-colors focus-ring"
+                  aria-label={t("nav.closeMenu", "Cerrar menú")}
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl text-ink-secondary transition-colors hover:bg-white focus-ring"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 overscroll-contain">
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.to !== "/projects"}
-                    onClick={() => setOpen(false)}
-                    className={({ isActive }) =>
-                      [
-                        "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-ring",
-                        isActive
-                          ? "bg-brand-50 text-brand-700"
-                          : "text-ink-secondary hover:bg-surface-muted hover:text-ink-primary",
-                      ].join(" ")
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        {isActive && (
-                          <motion.span
-                            layoutId="mobilenav-active-pill"
-                            className="absolute inset-y-0 left-0 w-1 rounded-r-full bg-brand-600"
-                            transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                          />
-                        )}
-                        <item.icon size={18} strokeWidth={2} className={isActive ? "text-brand-600" : undefined} />
-                        {t(item.translationKey, item.label)}
-                      </>
-                    )}
-                  </NavLink>
-                ))}
+              {user && (
+                <div className="px-3 pb-2">
+                  <UserCard user={user} />
+                </div>
+              )}
+
+              <nav aria-label={t("nav.menu", "Menú")} className="flex-1 px-3 py-3">
+                <NavList layoutId="mobilenav-active" onNavigate={() => setOpen(false)} />
               </nav>
 
               {/* Selector de idioma dentro del drawer */}
@@ -218,13 +189,13 @@ export function MobileNav() {
                         className={[
                           "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all focus-ring",
                           isActive
-                            ? "bg-brand-600 text-white font-semibold"
-                            : "text-ink-primary hover:bg-surface-muted",
+                            ? "bg-white text-brand-700 font-semibold shadow-[var(--shadow-card)] ring-1 ring-border"
+                            : "text-ink-primary hover:bg-white/70",
                         ].join(" ")}
                       >
                         <span className="text-base leading-none">{opt.flag}</span>
                         <span className="flex-1 text-left">{opt.label}</span>
-                        {isActive && <Check size={14} className="text-white/80 shrink-0" />}
+                        {isActive && <Check size={14} className="shrink-0 text-brand-600" />}
                       </button>
                     );
                   })}
@@ -232,22 +203,7 @@ export function MobileNav() {
               </div>
 
               {user && (
-                <div className="border-t border-border px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
-                  <div className="mb-2 flex items-center gap-2.5 px-1">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-xs font-semibold text-white">
-                      {initials(user.firstName, user.lastName, user.email)}
-                    </div>
-                    <div className="min-w-0">
-                      {(user.firstName || user.lastName) && (
-                        <p className="truncate text-sm font-semibold leading-tight text-ink-primary">
-                          {user.firstName} {user.lastName}
-                        </p>
-                      )}
-                      <p className="truncate text-xs leading-tight text-ink-secondary" title={user.email}>
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
+                <div className="border-t border-border/60 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
                   <button
                     type="button"
                     onClick={handleLogout}

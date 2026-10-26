@@ -81,12 +81,20 @@ export interface SessionSummary {
   originalIdea: string;
   relatedStudiesCount: number;
   createdAt: string;
+  /** Datos del diagnóstico guardado; vacíos si el análisis es antiguo y no los tenía. */
+  academicLevel: string | null;
+  explorationLevel: string | null;
+  trend: string | null;
 }
 
 /** Historial resumido (para la lista de "mis análisis"). */
 export async function listSessionSummaries(userId: string, limit = 30): Promise<SessionSummary[]> {
   const result = await query(
-    `SELECT id, original_idea, created_at, (diagnosis->'indicators'->>'relatedStudiesCount')::int AS related_studies_count
+    `SELECT id, original_idea, created_at,
+            (diagnosis->'indicators'->>'relatedStudiesCount')::int AS related_studies_count,
+            diagnosis->>'academicLevel' AS academic_level,
+            diagnosis->'exploration'->>'level' AS exploration_level,
+            diagnosis->'indicators'->>'trend' AS trend
      FROM research_sessions WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
     [userId, limit],
   );
@@ -95,6 +103,9 @@ export async function listSessionSummaries(userId: string, limit = 30): Promise<
     originalIdea: row.original_idea,
     relatedStudiesCount: row.related_studies_count ?? 0,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+    academicLevel: row.academic_level ?? null,
+    explorationLevel: row.exploration_level ?? null,
+    trend: row.trend ?? null,
   }));
 }
 

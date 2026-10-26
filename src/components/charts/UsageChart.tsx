@@ -21,7 +21,7 @@ function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length || !label) return null;
   const value = payload[0].value;
   return (
-    <div className="rounded-lg border border-border bg-white px-3 py-2 shadow-[var(--shadow-card-hover)]">
+    <div className="rounded-2xl border border-border bg-white px-3 py-2 shadow-[var(--shadow-card-hover)]">
       <p className="text-xs font-medium text-ink-secondary">{formatDay(label)}</p>
       <p className="text-sm font-semibold text-ink-primary tabular-nums">
         {value} {value === 1 ? "análisis" : "análisis"}
@@ -34,23 +34,23 @@ export function UsageChart({ data, height = 220 }: UsageChartProps) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }} barCategoryGap="30%">
-        <CartesianGrid stroke="#e1e0d9" vertical={false} />
+        <CartesianGrid stroke="#ece8ff" vertical={false} />
         <XAxis
           dataKey="date"
           tickFormatter={formatDay}
           tickLine={false}
-          axisLine={{ stroke: "#c3c2b7" }}
-          tick={{ fill: "#898781", fontSize: 12 }}
+          axisLine={{ stroke: "#d4ccff" }}
+          tick={{ fill: "#7d7a98", fontSize: 12 }}
         />
         <YAxis
           tickLine={false}
           axisLine={false}
-          tick={{ fill: "#898781", fontSize: 12 }}
+          tick={{ fill: "#7d7a98", fontSize: 12 }}
           width={32}
           allowDecimals={false}
         />
-        <Tooltip content={<ChartTooltip />} cursor={{ fill: "#2a78d6", fillOpacity: 0.06 }} />
-        <Bar dataKey="count" fill="#2a78d6" radius={[4, 4, 0, 0]} maxBarSize={28} />
+        <Tooltip content={<ChartTooltip />} cursor={{ fill: "#7865ea", fillOpacity: 0.08 }} />
+        <Bar dataKey="count" fill="#7865ea" radius={[8, 8, 0, 0]} maxBarSize={32} />
       </BarChart>
     </ResponsiveContainer>
   );

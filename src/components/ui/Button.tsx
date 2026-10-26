@@ -5,15 +5,17 @@ type Variant = "primary" | "secondary" | "ghost" | "outline";
 type Size = "sm" | "md" | "lg";
 
 const variantStyles: Record<Variant, string> = {
-  primary: "bg-brand-600 text-white hover:bg-brand-700 shadow-sm",
-  secondary: "bg-surface-muted text-ink-primary hover:bg-border",
-  ghost: "text-ink-secondary hover:bg-surface-muted hover:text-ink-primary",
-  outline: "border border-border text-ink-primary hover:bg-surface-muted",
+  // Degradado periwinkle → violeta suave con sombra de color: el botón principal "llama" sin gritar.
+  primary:
+    "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-[0_8px_20px_-8px_rgb(96_76_216/0.7)] hover:-translate-y-px hover:shadow-[0_12px_26px_-10px_rgb(96_76_216/0.8)]",
+  secondary: "bg-pastel-lavender text-brand-700 hover:bg-brand-100",
+  ghost: "text-ink-secondary hover:bg-pastel-lavender/70 hover:text-ink-primary",
+  outline: "border border-border bg-white/80 text-ink-primary hover:border-brand-300 hover:bg-white",
 };
 
 const sizeStyles: Record<Size, string> = {
-  sm: "h-8 px-3 text-sm gap-1.5",
-  md: "h-10 px-4 text-sm gap-2",
+  sm: "h-9 px-3.5 text-sm gap-1.5",
+  md: "h-11 px-5 text-sm gap-2",
   lg: "h-12 px-6 text-base gap-2",
 };
 
@@ -26,7 +28,7 @@ export function Button({ variant = "primary", size = "md", className, ...props }
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-ring disabled:opacity-50 disabled:pointer-events-none",
+        "inline-flex items-center justify-center rounded-xl font-semibold transition-all focus-ring disabled:opacity-50 disabled:pointer-events-none",
         variantStyles[variant],
         sizeStyles[size],
         className

@@ -23,6 +23,7 @@ const Refine = lazy(() => import("@/pages/Refine").then((m) => ({ default: m.Ref
 const Projects = lazy(() => import("@/pages/Projects").then((m) => ({ default: m.Projects })));
 const ProjectDetail = lazy(() => import("@/pages/ProjectDetail").then((m) => ({ default: m.ProjectDetail })));
 const History = lazy(() => import("@/pages/History").then((m) => ({ default: m.History })));
+const Evaluate = lazy(() => import("@/pages/Evaluate").then((m) => ({ default: m.Evaluate })));
 const Settings = lazy(() => import("@/pages/Settings").then((m) => ({ default: m.Settings })));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy").then((m) => ({ default: m.PrivacyPolicy })));
 const NotFound = lazy(() => import("@/pages/NotFound").then((m) => ({ default: m.NotFound })));
@@ -61,6 +62,7 @@ export default function App() {
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/projects/:id" element={<ProjectDetail />} />
                     <Route path="/history" element={<History />} />
+                    <Route path="/evaluar" element={<Evaluate />} />
                     <Route path="/settings" element={<Settings />} />
                   </Route>
                 </Route>
