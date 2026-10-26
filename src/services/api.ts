@@ -12,10 +12,16 @@ const TOKEN_STORAGE_KEY = "researchlens_token";
 
 export class ApiError extends Error {
   status: number;
+  /** Código corto que algunos errores del servidor incluyen (p. ej. "clerk_token_invalid") para poder diagnosticarlos. */
+  code?: string;
+  /** Detalle no sensible que acompaña al código, si lo hay. */
+  reason?: string;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, code?: string, reason?: string) {
     super(message);
     this.status = status;
+    this.code = code;
+    this.reason = reason;
     this.name = "ApiError";
   }
 }
@@ -43,9 +49,13 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   if (!response.ok) {
     let message = `Error ${response.status} al llamar ${path}`;
+    let code: string | undefined;
+    let reason: string | undefined;
     try {
-      const body = (await response.json()) as { error?: string };
+      const body = (await response.json()) as { error?: string; code?: string; reason?: string };
       if (body.error) message = body.error;
+      code = typeof body.code === "string" ? body.code : undefined;
+      reason = typeof body.reason === "string" ? body.reason : undefined;
     } catch {
       // el cuerpo no era JSON: se conserva el mensaje genérico
     }
@@ -55,7 +65,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
       window.dispatchEvent(new CustomEvent("researchlens:unauthorized"));
     }
 
-    throw new ApiError(response.status, message);
+    throw new ApiError(response.status, message, code, reason);
   }
 
   if (response.status === 204) return undefined as T;

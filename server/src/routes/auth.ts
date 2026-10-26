@@ -10,7 +10,7 @@ import {
   updateUserName,
 } from "../db/users.js";
 import { burnPasswordCheck, hashPassword, verifyPassword, signToken } from "../lib/auth.js";
-import { resolveClerkProfile } from "../lib/clerk.js";
+import { ClerkSyncError, resolveClerkProfile, type ClerkSyncErrorCode } from "../lib/clerk.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { publicErrorMessage } from "../lib/httpErrors.js";
 
@@ -24,6 +24,14 @@ const MAX_PASSWORD_LENGTH = 128;
 const MAX_NAME_LENGTH = 60;
 
 const isString = (value: unknown): value is string => typeof value === "string";
+
+// Respuesta al usuario por cada motivo de fallo del login con Google: mensaje amable + código para soporte.
+const CLERK_SYNC_RESPONSES: Record<ClerkSyncErrorCode, { status: number; message: string }> = {
+  clerk_secret_missing: { status: 503, message: "El inicio de sesión con Google no está disponible por ahora." },
+  clerk_token_invalid: { status: 403, message: "No pudimos validar tu sesión de Google. Intenta de nuevo." },
+  clerk_user_lookup_failed: { status: 502, message: "No pudimos leer tu perfil de Google. Intenta de nuevo." },
+  clerk_no_email: { status: 422, message: "Tu cuenta de Google no compartió un correo electrónico." },
+};
 
 function publicUser(user: { id: string; email: string; firstName: string; lastName: string; createdAt: string }) {
   return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, createdAt: user.createdAt };
@@ -120,7 +128,12 @@ authRouter.post("/clerk-sync", async (req, res) => {
     res.json({ token, user: publicUser(user) });
   } catch (err) {
     console.error("[POST /auth/clerk-sync]", err);
-    res.status(502).json({ error: publicErrorMessage(err) });
+    if (err instanceof ClerkSyncError) {
+      const { status, message } = CLERK_SYNC_RESPONSES[err.code];
+      // 403 y no 401: un 401 haría que el frontend cierre la sesión local, y aquí todavía no hay ninguna.
+      return res.status(status).json({ error: message, code: err.code, ...(err.reason ? { reason: err.reason } : {}) });
+    }
+    res.status(502).json({ error: publicErrorMessage(err), code: "sync_failed" });
   }
 });
 
